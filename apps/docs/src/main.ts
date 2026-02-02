@@ -1,8 +1,8 @@
-import { Header } from "@repo/ui/header";
+import { Header } from "@prosemirror-completion/plugin/header";
 import "./style.css";
 import typescriptLogo from "/typescript.svg";
-import { Counter } from "@repo/ui/counter";
-import { setupCounter } from "@repo/ui/setup-counter";
+import { Counter } from "@prosemirror-completion/plugin/counter";
+import { setupCounter } from "@prosemirror-completion/plugin/setup-counter";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>

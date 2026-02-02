@@ -1,5 +1,5 @@
 {
-  "name": "@repo/ui",
+  "name": "@prosemirror-completion/plugin",
   "version": "0.0.0",
   "exports": {
     "./counter": "./components/counter.ts",
@@ -11,8 +11,8 @@
     "lint": "eslint \"**/*.ts\""
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@prosemirror-completion/eslint-config": "workspace:*",
+    "@prosemirror-completion/typescript-config": "workspace:*",
     "eslint": "^8.57.0",
     "typescript": "5.5.4"
   }
