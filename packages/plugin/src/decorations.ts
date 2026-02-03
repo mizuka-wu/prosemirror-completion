@@ -73,7 +73,10 @@ export function createCompletionFragment(
 /**
  * 创建空的 DecorationSet
  */
-export function emptyDecorations(state: EditorState): DecorationSet {
+export function emptyDecorations(state: EditorState | null): DecorationSet {
+  if (!state) {
+    return DecorationSet.empty;
+  }
   return DecorationSet.create(state.doc, []);
 }
 
@@ -81,13 +84,13 @@ export function emptyDecorations(state: EditorState): DecorationSet {
  * 更新 DecorationSet，添加 ghost decoration
  */
 export function updateGhostDecoration(
-  state: EditorState,
+  state: EditorState | null,
   pluginState: CompletionPluginState,
   pos: number,
   result: CompletionResult,
   options: CompletionOptions
 ): DecorationSet {
-  if (!options.showGhost || !result) {
+  if (!options.showGhost || !result || !state) {
     return emptyDecorations(state);
   }
 
@@ -96,8 +99,8 @@ export function updateGhostDecoration(
 }
 
 /**
- * 清理所有 decoration
+ * 创建空的 DecorationSet
  */
-export function clearDecorations(state: EditorState): DecorationSet {
+export function clearDecorations(state: EditorState | null): DecorationSet {
   return emptyDecorations(state);
 }

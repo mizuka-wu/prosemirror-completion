@@ -41,7 +41,7 @@ export function createCompletionPlugin(
           triggerPos: null,
           isLoading: false,
           abortController: null,
-          decorations: emptyDecorations(null as unknown as import("prosemirror-state").EditorState),
+          decorations: emptyDecorations(null),
           debounceTimer: null,
           options,
         };
@@ -63,7 +63,7 @@ export function createCompletionPlugin(
                 isLoading: false,
                 abortController: null,
                 decorations: updateGhostDecoration(
-                  tr,
+                  { doc: tr.doc } as import("prosemirror-state").EditorState,
                   pluginState,
                   action.pos,
                   action.result,
@@ -80,7 +80,7 @@ export function createCompletionPlugin(
                 triggerPos: null,
                 isLoading: false,
                 abortController: null,
-                decorations: clearDecorations(tr),
+                decorations: clearDecorations({ doc: tr.doc } as import("prosemirror-state").EditorState),
                 debounceTimer: null,
               };
             }
@@ -99,7 +99,7 @@ export function createCompletionPlugin(
                 triggerPos: null,
                 isLoading: false,
                 abortController: null,
-                decorations: clearDecorations(tr),
+                decorations: clearDecorations({ doc: tr.doc } as import("prosemirror-state").EditorState),
                 debounceTimer: null,
               };
 
@@ -144,7 +144,7 @@ export function createCompletionPlugin(
             triggerPos: null,
             isLoading: false,
             abortController: null,
-            decorations: clearDecorations(tr),
+            decorations: clearDecorations({ doc: tr.doc } as import("prosemirror-state").EditorState),
             debounceTimer: null,
           };
         }

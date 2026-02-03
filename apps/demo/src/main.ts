@@ -109,21 +109,34 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 const style = document.createElement("style");
 style.textContent = `
   .demo-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .demo-container h1 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #333;
   }
   .tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 12px;
   }
   .tab-button {
     padding: 8px 16px;
     border: 1px solid #ddd;
-    background: #f5f5f5;
+    background: white;
     cursor: pointer;
     border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .tab-button:hover {
+    background: #f5f5f5;
   }
   .tab-button.active {
     background: #007acc;
@@ -132,30 +145,139 @@ style.textContent = `
   }
   #editor-container {
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 6px;
     min-height: 300px;
-    padding: 10px;
+    background: white;
   }
   .ProseMirror {
     outline: none;
-    min-height: 280px;
+    min-height: 300px;
+    padding: 16px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+  }
+  .ProseMirror p {
+    margin: 0 0 0.8em 0;
+  }
+  .ProseMirror-focused {
+    border-color: #007acc;
+    box-shadow: 0 0 0 3px rgba(0,122,204,0.1);
   }
   .prosemirror-ghost-text {
     color: #999;
-    opacity: 0.6;
+    opacity: 0.7;
     pointer-events: none;
+    font-style: italic;
   }
   .instructions {
     margin-top: 20px;
-    padding: 15px;
+    padding: 16px;
     background: #f8f9fa;
-    border-radius: 4px;
+    border-radius: 6px;
+    border-left: 4px solid #007acc;
+  }
+  .instructions p {
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+  .instructions ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .instructions li {
+    margin: 4px 0;
   }
   .instructions kbd {
-    background: #eee;
+    background: #e8e8e8;
     padding: 2px 6px;
     border-radius: 3px;
     font-family: monospace;
+    font-size: 0.9em;
+    border: 1px solid #ccc;
+  }
+  /* ProseMirror Menubar */
+  .ProseMirror-menubar {
+    border-bottom: 1px solid #ddd;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    border-radius: 6px 6px 0 0;
+  }
+  .ProseMirror-menubar-wrapper {
+    border-radius: 6px 6px 0 0;
+  }
+  .ProseMirror-menuitem {
+    display: inline-flex;
+  }
+  .ProseMirror-menuseparator {
+    display: inline-block;
+    width: 1px;
+    height: 20px;
+    background: #ddd;
+    margin: 0 4px;
+  }
+  .ProseMirror-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #555;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .ProseMirror-icon:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+  }
+  .ProseMirror-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .ProseMirror-menu-dropdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+  }
+  .ProseMirror-menu-dropdown:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+  }
+  .ProseMirror-menu-dropdown-menu {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    padding: 4px 0;
+    min-width: 120px;
+  }
+  .ProseMirror-menu-dropdown-item {
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+  }
+  .ProseMirror-menu-dropdown-item:hover {
+    background: #f0f0f0;
+  }
+  .ProseMirror-menu-active {
+    background: #e3f2fd !important;
+    border-color: #90caf9 !important;
+    color: #1976d2 !important;
   }
 `;
 document.head.appendChild(style);

@@ -9,3 +9,7 @@ dist-ssr
 .cache
 server/dist
 public/dist
+
+# VitePress
+.vitepress/dist
+.vitepress/cache
