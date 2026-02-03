@@ -1,5 +1,6 @@
 import type { EditorView } from "prosemirror-view";
 import type { CompletionPluginState, CompletionAction } from "./types";
+import { insertCompletion } from "./commands";
 
 /**
  * 键盘事件处理器
@@ -20,8 +21,9 @@ export function handleKeyDown(
   // Tab: 应用补全
   if (event.key === "Tab" && !event.shiftKey) {
     event.preventDefault();
-    const action: CompletionAction = { type: "apply" };
-    view.dispatch(view.state.tr.setMeta("prosemirror-completion", action));
+    // 使用 insertCompletion 实际插入文本
+    const tr = insertCompletion(view.state, activeSuggestion);
+    view.dispatch(tr);
     return true;
   }
 
