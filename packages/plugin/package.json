@@ -16,6 +16,8 @@
     "prosemirror-transform": "^1.7.3"
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^20.0.0",
     "eslint": "^8.57.0",
     "typescript": "5.5.4"
