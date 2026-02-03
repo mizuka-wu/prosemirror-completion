@@ -119,36 +119,6 @@ export function createCompletionPlugin(
           };
         }
 
-        // 检查是否需要取消补全（例如光标移出了触发区域）
-        const { from } = tr.selection;
-        if (from < pluginState.triggerPos) {
-          // 取消补全
-          if (pluginState.abortController) {
-            pluginState.abortController.abort();
-          }
-          if (pluginState.debounceTimer) {
-            clearTimeout(pluginState.debounceTimer);
-          }
-
-          // 调用 onExit 回调
-          if (options.onExit) {
-            // onExit 会在 view 更新后调用
-            setTimeout(() => {
-              // 这需要 view 引用，在这里无法直接调用
-            }, 0);
-          }
-
-          return {
-            ...pluginState,
-            activeSuggestion: null,
-            triggerPos: null,
-            isLoading: false,
-            abortController: null,
-            decorations: clearDecorations({ doc: tr.doc } as import("prosemirror-state").EditorState),
-            debounceTimer: null,
-          };
-        }
-
         // 映射 decorations
         return {
           ...pluginState,
@@ -283,31 +253,42 @@ export function createCompletionPlugin(
         };
       })();
 
-      // 监听文档变化
-      const handleInput = () => {
-        const { from } = view.state.selection;
-
+      // 监听文档和选择变化
+      const handleInput = (from: number) => {
         // 检查是否应该触发补全
         if (!shouldTriggerCompletion(view.state, { ...options, minTriggerLength })) {
           return;
         }
-
-        const pluginState = completionPluginKey.getState(view.state);
-        if (pluginState?.activeSuggestion) {
-          // 已经有补全，更新它
-          debouncedRequest(from);
-        } else {
-          // 新的补全请求
-          debouncedRequest(from);
-        }
+        // 触发新的补全请求
+        debouncedRequest(from);
       };
 
-      // 使用 ProseMirror 的 update 监听文档变化
+      // 使用 ProseMirror 的 update 监听文档和选择变化
       return {
         update: (view, prevState) => {
-          // 检查文档是否变化
+          const pluginState = completionPluginKey.getState(view.state);
+          if (!pluginState) return;
+
+          // 检查是否有 active suggestion
+          if (pluginState.activeSuggestion) {
+            const { from } = view.state.selection;
+            const selectionChanged = view.state.selection.eq(prevState.selection) === false;
+            const docChanged = view.state.doc !== prevState.doc;
+
+            // 如果有补全，检查是否需要取消
+            if (docChanged || selectionChanged) {
+              // 取消当前补全
+              view.dispatch(
+                view.state.tr.setMeta("prosemirror-completion", {
+                  type: "cancel",
+                })
+              );
+            }
+          }
+
+          // 检查是否应该触发新的补全
           if (view.state.doc !== prevState.doc) {
-            handleInput();
+            handleInput(view.state.selection.from);
           }
         },
         destroy: () => {
