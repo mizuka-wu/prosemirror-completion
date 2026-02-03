@@ -25,6 +25,67 @@ const state = EditorState.create({
 const view = new EditorView(document.querySelector("#editor"), { state });
 ```
 
+## HTML Rich Text Completion
+
+返回 HTML 字符串，插件会自动解析并插入带格式的内容：
+
+```typescript
+const htmlPlugin = createCompletionPlugin({
+  debounceMs: 500,
+  callCompletion: async (context) => {
+    return {
+      plain: "Bold and italic text",
+      html: "<p>This is <strong>bold</strong> and <em>italic</em> text</p>"
+    };
+  },
+});
+```
+
+## Markdown to ProseMirror Node
+
+使用 prosemirror-markdown 将 Markdown 解析为 ProseMirror Node：
+
+```typescript
+import { defaultMarkdownParser } from "prosemirror-markdown";
+
+const markdownPlugin = createCompletionPlugin({
+  debounceMs: 500,
+  callCompletion: async (context) => {
+    const markdown = `
+## Suggestion
+
+This is **bold** and *italic* text.
+
+- Item 1
+- Item 2
+`;
+    const node = defaultMarkdownParser.parse(markdown);
+    return { prosemirror: node };
+  },
+});
+```
+
+## Direct ProseMirror Node
+
+直接构建 ProseMirror Node 对象：
+
+```typescript
+import { schema } from "prosemirror-schema-basic";
+
+const nodePlugin = createCompletionPlugin({
+  debounceMs: 500,
+  callCompletion: async (context) => {
+    // 创建带格式的段落
+    const paragraph = schema.nodes.paragraph.create(
+      null,
+      schema.text("Bold text", [schema.marks.strong.create()])
+    );
+
+    return { prosemirror: paragraph };
+  },
+});
+```
+
 ## Mock Completion
 
 ```typescript
@@ -40,7 +101,7 @@ const mockPlugin = createCompletionPlugin({
     return `继续: ${context.beforeText.slice(-20)}`;
   },
   getPromptType: (context) => {
-    if (context.beforeText.includes("```")) {
+    if (context.beforeText.includes("\`\`\`")) {
       return "code";
     }
     return "common";
@@ -52,7 +113,6 @@ const mockPlugin = createCompletionPlugin({
 
 ```typescript
 import { CreateMLCEngine } from "@mlc-ai/web-llm";
-import { buildPrompt } from "@prosemirror-completion/plugin";
 
 let enginePromise = null;
 
@@ -68,7 +128,7 @@ const webLLMPlugin = createCompletionPlugin({
   callCompletion: async (context) => {
     const engine = await getEngine();
 
-    const prompt = buildPrompt(context);
+    const prompt = `Continue: ${context.beforeText}`;
 
     const response = await engine.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
@@ -129,32 +189,12 @@ createCompletionPlugin({
 });
 ```
 
-## Code Editor
-
-```typescript
-import { defaultGetPromptType } from "@prosemirror-completion/plugin";
-
-const codePlugin = createCompletionPlugin({
-  debounceMs: 500,
-  minTriggerLength: 5,
-  getPromptType: (context) => {
-    // Check if in code block
-    if (context.parent.type.name === "code_block") {
-      return "code";
-    }
-    // Use default detection
-    return defaultGetPromptType(context);
-  },
-  callCompletion: async (context) => {
-    if (context.promptType === "code") {
-      // Use code-specific completion
-      return fetchCodeCompletion(context);
-    }
-    return fetchTextCompletion(context);
-  },
-});
-```
-
 ## Full Demo
 
-See the [demo app](../demo/) for a complete working example with both mock and WebLLM completion modes.
+See the [demo app](../demo/) for a complete working example with all completion modes:
+
+- **Mock** - Basic text completion
+- **HTML** - Rich text with HTML formatting
+- **Markdown** - Markdown parsed to ProseMirror nodes
+- **ProseMirror** - Direct Node construction
+- **WebLLM** - Real AI completion

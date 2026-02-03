@@ -73,7 +73,8 @@ Return type of `callCompletion`.
 type CompletionResult =
   | string
   | { plain: string; html?: string }
-  | { html: string };
+  | { html: string }
+  | { prosemirror: Node };
 ```
 
 ### String Result
@@ -97,6 +98,33 @@ return {
 return {
   html: "<p>formatted paragraph</p>"
 };
+```
+
+### ProseMirror Node
+
+直接返回 ProseMirror Node 对象，支持完整的文档结构：
+
+```typescript
+import { schema } from "prosemirror-schema-basic";
+
+// 创建带格式的段落
+const paragraph = schema.nodes.paragraph.create(
+  null,
+  schema.text("Bold text", [schema.marks.strong.create()])
+);
+
+return { prosemirror: paragraph };
+```
+
+配合 prosemirror-markdown 使用：
+
+```typescript
+import { defaultMarkdownParser } from "prosemirror-markdown";
+
+const markdown = "**Bold** and *italic* text";
+const node = defaultMarkdownParser.parse(markdown);
+
+return { prosemirror: node };
 ```
 
 ## Commands

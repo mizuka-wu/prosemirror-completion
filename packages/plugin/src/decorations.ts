@@ -1,5 +1,6 @@
 import { Decoration, DecorationSet } from "prosemirror-view";
 import type { EditorState } from "prosemirror-state";
+import type { Node } from "prosemirror-model";
 import type {
   CompletionOptions,
   CompletionResult,
@@ -45,6 +46,10 @@ export function parseCompletionResult(result: CompletionResult): string {
     tmp.innerHTML = result.html;
     return tmp.textContent ?? "";
   }
+  if ("prosemirror" in result && result.prosemirror) {
+    // 从 ProseMirror Node 提取文本内容
+    return result.prosemirror.textContent ?? "";
+  }
   return "";
 }
 
@@ -54,9 +59,12 @@ export function parseCompletionResult(result: CompletionResult): string {
 export function createCompletionFragment(
   result: CompletionResult,
   state: EditorState
-): { text: string; html?: string } {
+): { text: string; html?: string; node?: Node } {
   if (typeof result === "string") {
     return { text: result };
+  }
+  if ("prosemirror" in result) {
+    return { text: result.prosemirror.textContent ?? "", node: result.prosemirror };
   }
   if ("plain" in result && "html" in result) {
     return { text: result.plain, html: result.html };
@@ -67,7 +75,10 @@ export function createCompletionFragment(
       html: result.html,
     };
   }
-  return { text: result.plain ?? "" };
+  if ("plain" in result) {
+    return { text: result.plain };
+  }
+  return { text: "" };
 }
 
 /**

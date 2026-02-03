@@ -3,8 +3,10 @@ import { EditorView } from "prosemirror-view";
 import { Schema, DOMParser } from "prosemirror-model";
 import { schema as basicSchema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
+import { defaultMarkdownParser } from "prosemirror-markdown";
 import { createCompletionPlugin } from "@prosemirror-completion/plugin";
 import type { CompletionContext, CompletionResult } from "@prosemirror-completion/plugin";
+import type { Node } from "prosemirror-model";
 import "./style.css";
 import "prosemirror-view/style/prosemirror.css";
 import "prosemirror-example-setup/style/style.css";
@@ -15,16 +17,13 @@ const schema = new Schema({
   marks: basicSchema.spec.marks,
 });
 
-// 模拟 WebLLM 补全函数
+// ============ 1. 基础 Mock 补全 ============
 async function mockCallCompletion(
   context: CompletionContext
 ): Promise<CompletionResult> {
-  // 模拟延迟
   await new Promise((resolve) => setTimeout(resolve, 500));
-
   const beforeText = context.beforeText;
 
-  // 简单的模拟补全
   if (context.promptType === "code") {
     return `// TODO: Implement based on:\n// ${beforeText.slice(-50)}`;
   } else if (context.promptType === "markdown") {
@@ -34,12 +33,76 @@ async function mockCallCompletion(
   }
 }
 
-// WebLLM 补全函数（真实实现）
+// ============ 2. HTML 富文本补全 ============
+async function htmlCallCompletion(
+  context: CompletionContext
+): Promise<CompletionResult> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const beforeText = context.beforeText;
+
+  return {
+    plain: `粗体和斜体文本示例`,
+    html: `<p>这是<strong>粗体</strong>和<em>斜体</em>的示例，基于: ${beforeText.slice(-20)}</p>`
+  };
+}
+
+// ============ 3. Markdown 转 ProseMirror Node ============
+async function markdownCallCompletion(
+  context: CompletionContext
+): Promise<CompletionResult> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const beforeText = context.beforeText;
+
+  const markdownContent = `
+## 基于 "${beforeText.slice(-30)}" 的建议
+
+这是一个 **Markdown** 格式的内容示例。
+
+- 支持列表项
+- 支持*斜体*和**粗体**
+
+> 这是一个引用块
+`;
+
+  const parsedNode = defaultMarkdownParser.parse(markdownContent);
+
+  if (parsedNode) {
+    return { prosemirror: parsedNode };
+  }
+
+  return markdownContent;
+}
+
+// ============ 4. 直接返回 ProseMirror Node ============
+async function prosemirrorNodeCompletion(
+  context: CompletionContext
+): Promise<CompletionResult> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  const paragraph = schema.nodes.paragraph.create(
+    null,
+    schema.text("这是直接构建的 ProseMirror Node", [
+      schema.marks.strong.create()
+    ])
+  );
+
+  const paragraph2 = schema.nodes.paragraph.create(
+    null,
+    schema.text("支持富文本格式", [
+      schema.marks.em.create()
+    ])
+  );
+
+  const doc = schema.nodes.doc.create(null, [paragraph, paragraph2]);
+
+  return { prosemirror: doc };
+}
+
+// ============ 5. WebLLM 真实 AI 补全 ============
 async function webLLMCallCompletion(
   context: CompletionContext
 ): Promise<CompletionResult> {
   const { CreateMLCEngine } = await import("@mlc-ai/web-llm");
-
   const engine = await CreateMLCEngine("Llama-3.1-8B-Instruct-q4f32_1-MLC");
 
   const prompt = `Continue the following text naturally:\n\n${context.beforeText}\n\nContinue:`;
@@ -53,12 +116,31 @@ async function webLLMCallCompletion(
   return response.choices[0]?.message?.content ?? "";
 }
 
+// 补全函数映射
+type CompletionMode = "mock" | "html" | "markdown" | "prosemirror" | "webllm";
+
+const completionHandlers: Record<CompletionMode, (context: CompletionContext) => Promise<CompletionResult>> = {
+  mock: mockCallCompletion,
+  html: htmlCallCompletion,
+  markdown: markdownCallCompletion,
+  prosemirror: prosemirrorNodeCompletion,
+  webllm: webLLMCallCompletion,
+};
+
+const modeDescriptions: Record<CompletionMode, string> = {
+  mock: "基础 Mock 补全 - 返回纯文本",
+  html: "HTML 补全 - 返回 HTML 字符串，解析后插入",
+  markdown: "Markdown 补全 - 使用 prosemirror-markdown 解析",
+  prosemirror: "ProseMirror Node - 直接返回 Node 对象",
+  webllm: "WebLLM - 真实 AI 补全",
+};
+
 // 创建编辑器
-function createEditor(container: HTMLElement, useWebLLM = false) {
+function createEditor(container: HTMLElement, mode: CompletionMode) {
   const completionPlugin = createCompletionPlugin({
     debounceMs: 500,
     minTriggerLength: 3,
-    callCompletion: useWebLLM ? webLLMCallCompletion : mockCallCompletion,
+    callCompletion: completionHandlers[mode],
     ghostClassName: "prosemirror-ghost-text",
     showGhost: true,
     onChange: (context, view) => {
@@ -88,11 +170,16 @@ function createEditor(container: HTMLElement, useWebLLM = false) {
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="demo-container">
     <h1>ProseMirror Completion Demo</h1>
+    <p class="subtitle">支持多种返回类型的智能补全插件</p>
     <div class="tabs">
-      <button class="tab-button active" data-mode="mock">Mock 补全</button>
-      <button class="tab-button" data-mode="webllm">WebLLM 补全</button>
+      <button class="tab-button active" data-mode="mock">Mock</button>
+      <button class="tab-button" data-mode="html">HTML</button>
+      <button class="tab-button" data-mode="markdown">Markdown</button>
+      <button class="tab-button" data-mode="prosemirror">ProseMirror</button>
+      <button class="tab-button" data-mode="webllm">WebLLM</button>
     </div>
     <div id="editor-container"></div>
+    <div class="mode-description" id="mode-description"></div>
     <div class="instructions">
       <p><strong>使用说明：</strong></p>
       <ul>
@@ -116,11 +203,18 @@ style.textContent = `
   }
   .demo-container h1 {
     margin-top: 0;
+    margin-bottom: 4px;
     font-size: 1.5em;
     color: #333;
   }
+  .subtitle {
+    margin: 0 0 16px 0;
+    color: #666;
+    font-size: 0.9em;
+  }
   .tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 16px;
     border-bottom: 1px solid #e0e0e0;
@@ -148,6 +242,17 @@ style.textContent = `
     border-radius: 6px;
     min-height: 300px;
     background: white;
+  }
+  .mode-description {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: #e3f2fd;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1976d2;
+  }
+  .mode-description:empty {
+    display: none;
   }
   .ProseMirror {
     outline: none;
@@ -285,9 +390,16 @@ document.head.appendChild(style);
 // 当前编辑器
 let currentView: EditorView | null = null;
 const container = document.getElementById("editor-container")!;
+const descriptionEl = document.getElementById("mode-description")!;
+
+// 更新模式描述
+function updateDescription(mode: CompletionMode) {
+  descriptionEl.textContent = `当前模式: ${modeDescriptions[mode]}`;
+}
 
 // 创建初始编辑器
-currentView = createEditor(container, false);
+currentView = createEditor(container, "mock");
+updateDescription("mock");
 
 // 标签切换
 document.querySelectorAll(".tab-button").forEach((btn) => {
@@ -297,10 +409,11 @@ document.querySelectorAll(".tab-button").forEach((btn) => {
       .forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
 
-    const mode = btn.getAttribute("data-mode");
+    const mode = btn.getAttribute("data-mode") as CompletionMode;
     if (currentView) {
       currentView.destroy();
     }
-    currentView = createEditor(container, mode === "webllm");
+    currentView = createEditor(container, mode);
+    updateDescription(mode);
   });
 });

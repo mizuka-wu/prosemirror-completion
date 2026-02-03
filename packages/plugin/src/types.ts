@@ -9,7 +9,8 @@ import { PluginKey } from "prosemirror-state";
 export type CompletionResult =
   | string
   | { plain: string; html?: string }
-  | { html: string };
+  | { html: string }
+  | { prosemirror: Node };
 
 /**
  * Prompt 类型建议
