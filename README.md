@@ -29,9 +29,27 @@ const completionPlugin = createCompletionPlugin({
 });
 ```
 
+## Configuration
+
+`createCompletionPlugin` 接受以下可配置项：
+
+| 选项 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `debounceMs` | `number` | `300` | 触发补全前的防抖时间，单位毫秒 |
+| `minTriggerLength` | `number` | `3` | 光标前至少输入多少字符才会开始请求 |
+| `callCompletion` | `(context) => CompletionResult \| Promise<CompletionResult>` | **必填** | 真正的补全函数，返回字符串、HTML 或 ProseMirror Node |
+| `getPromptType` | `(context) => PromptType` | `defaultGetPromptType` | 自定义 prompt 类型推断逻辑（如代码/Markdown 检测） |
+| `onChange` | `(context, view) => void` | `undefined` | 用户持续输入时触发，可用于埋点或实时展示状态 |
+| `onExit` | `(view) => void` | `undefined` | 用户按 `Esc` 或取消补全时回调 |
+| `onApply` | `(result, view) => void` | `undefined` | 用户按 `Tab` 接受补全时回调，可用于记录结果 |
+| `ghostClassName` | `string` | `"prosemirror-ghost-text"` | Ghost Text 的自定义样式类名 |
+| `showGhost` | `boolean` | `true` | 是否展示 Ghost Text（可关闭仅保留快捷键行为） |
+
+> `CompletionResult` 支持 `string`、`{ plain; html? }`、`{ html }`、`{ prosemirror: Node }`，详见 docs 示例。
+
 ## Project Structure
 
-```
+```text
 packages/plugin/src/
 ├── types.ts       # Type definitions
 ├── plugin.ts      # Core plugin implementation
