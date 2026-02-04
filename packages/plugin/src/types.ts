@@ -101,6 +101,11 @@ export interface CompletionOptions {
 
 export interface ResolvedCompletionOptions extends Required<CompletionOptions> {}
 
+export interface PromptOptions {
+  type?: PromptType;
+  lang?: string;
+}
+
 /**
  * 内部插件状态
  */

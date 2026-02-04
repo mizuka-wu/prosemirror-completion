@@ -33,6 +33,7 @@ import {
   createCompletionPlugin,
   type CompletionContext,
   type CompletionResult,
+  buildPrompt,
 } from "@prosemirror-completion/plugin";
 import { useData } from "vitepress";
 import { useWebLLM } from "../webllmStore";
@@ -58,20 +59,6 @@ const messages = {
     dismissed: "Completion dismissed.",
     readyStatus: "WebLLM ready. AI modes are available.",
     errorStatus: "Failed to load WebLLM. Click to retry.",
-    buildPrompt: (context: CompletionContext) => {
-      const before = context.beforeText.slice(-400) || "(empty)";
-      const afterSnippet = context.afterText.slice(0, 160);
-      const promptType = context.promptType ?? "text";
-      return [
-        `You are an inline writing assistant continuing ${promptType}. Match the existing tone and language.`,
-        "Respond with 1-2 coherent sentences. Do not repeat existing content or add apologies.",
-        "Context before cursor:\n```text\n" + before + "\n```",
-        afterSnippet ? "Context after cursor:\n```text\n" + afterSnippet + "\n```" : "",
-        "Continuation:",
-      ]
-        .filter(Boolean)
-        .join("\n\n");
-    },
   },
   zh: {
     preloadButton: "预加载 WebLLM",
@@ -87,20 +74,6 @@ const messages = {
     dismissed: "补全已取消。",
     readyStatus: "WebLLM 已可使用。",
     errorStatus: "加载失败，请重试。",
-    buildPrompt: (context: CompletionContext) => {
-      const before = context.beforeText.slice(-400) || "(无内容)";
-      const afterSnippet = context.afterText.slice(0, 160);
-      const promptType = context.promptType ?? "文本";
-      return [
-        `你是一名内嵌写作助手，请继续当前的${promptType}内容，保持语气和语言一致。`,
-        "只输出 1~2 句自然的中文，不要重复已存在的文字，也不要道歉。",
-        "光标前上下文：\n```text\n" + before + "\n```",
-        afterSnippet ? "光标后上下文：\n```text\n" + afterSnippet + "\n```" : "",
-        "续写：",
-      ]
-        .filter(Boolean)
-        .join("\n\n");
-    },
   },
 };
 
@@ -154,7 +127,7 @@ const completionPlugin = createCompletionPlugin({
       return localeText.value.warmingUpFallback;
     }
 
-    const prompt = localeText.value.buildPrompt(context);
+    const prompt = buildPrompt(context, { lang: lang.value });
     console.log("[WebLLMEditor] Sending prompt to WebLLM", prompt.slice(-160));
 
     const response = await engine.chat.completions.create({
