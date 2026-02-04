@@ -11,5 +11,5 @@ server/dist
 public/dist
 
 # VitePress
-.vitepress/dist
-.vitepress/cache
+apps/docs/.vitepress/dist
+apps/docs/.vitepress/cache
