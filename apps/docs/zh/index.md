@@ -47,3 +47,10 @@ const plugin = createCompletionPlugin({
 ```
 
 继续阅读 [指南](/zh/guide/) 了解如何配置插件并接入 WebLLM。
+
+## 交互示例
+
+体验基础的补全链路（ProseMirror + Completion Plugin + WebLLM）👇
+
+<!-- markdownlint-disable-next-line MD033 -->
+<WebLLMEditor />
