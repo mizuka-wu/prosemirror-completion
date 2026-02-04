@@ -1,4 +1,9 @@
 {
   "extends": "../../packages/typescript-config/vite.json",
-  "include": ["src"]
+  "include": [
+    "docs/.vitepress/**/*.ts",
+    "docs/.vitepress/**/*.mts",
+    "docs/.vitepress/**/*.cts",
+    "docs/.vitepress/**/*.tsx"
+  ]
 }

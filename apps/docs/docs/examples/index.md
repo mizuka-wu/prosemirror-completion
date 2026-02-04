@@ -1,5 +1,73 @@
 # Examples
 
+Explore different ways to wire the completion plugin into editors and runtimes. Each scenario focuses on a single idea with focused snippets so you can mix and match in your app.
+
+## Vue + WebLLM Example
+
+Combine WebLLM with the plugin inside a Vue 3 + ProseMirror setup for a fully in-browser AI completion experience. See the [full write-up](./vue-webllm) for additional explanations.
+
+```vue
+<template>
+  <div class="editor" ref="editorEl"></div>
+  <p class="hint">Tab to accept · Esc to cancel</p>
+</template>
+
+<script setup lang="ts">
+import { onMounted, ref, onBeforeUnmount } from "vue";
+import { EditorState } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { schema } from "prosemirror-schema-basic";
+import { exampleSetup } from "prosemirror-example-setup";
+import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { CreateMLCEngine } from "@mlc-ai/web-llm";
+
+const editorEl = ref<HTMLDivElement | null>(null);
+let enginePromise: Promise<ReturnType<typeof CreateMLCEngine>> | null = null;
+const getEngine = () => enginePromise ??= CreateMLCEngine("Llama-3.1-8B-Instruct-q4f32_1-MLC");
+
+const plugin = createCompletionPlugin({
+  debounceMs: 400,
+  callCompletion: async (context) => {
+    const engine = await getEngine();
+    const response = await engine.chat.completions.create({
+      messages: [{ role: "user", content: context.beforeText }],
+      temperature: 0.6,
+      max_tokens: 80,
+      stream: false,
+    });
+    return response.choices[0]?.message?.content ?? "";
+  },
+});
+
+let view: EditorView | null = null;
+
+onMounted(() => {
+  view = new EditorView(editorEl.value!, {
+    state: EditorState.create({
+      schema,
+      plugins: [...exampleSetup({ schema }), plugin],
+    }),
+  });
+});
+
+onBeforeUnmount(() => view?.destroy());
+</script>
+
+<style scoped>
+.editor {
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 240px;
+}
+.hint {
+  margin-top: 8px;
+  color: #768390;
+  font-size: 13px;
+}
+</style>
+```
+
 ## Basic Example
 
 ```typescript
@@ -27,7 +95,7 @@ const view = new EditorView(document.querySelector("#editor"), { state });
 
 ## HTML Rich Text Completion
 
-返回 HTML 字符串，插件会自动解析并插入带格式的内容：
+Return HTML so the suggestion inserts formatted content:
 
 ```typescript
 const htmlPlugin = createCompletionPlugin({
@@ -43,7 +111,7 @@ const htmlPlugin = createCompletionPlugin({
 
 ## Markdown to ProseMirror Node
 
-使用 prosemirror-markdown 将 Markdown 解析为 ProseMirror Node：
+Parse Markdown into a ProseMirror node via `prosemirror-markdown`:
 
 ```typescript
 import { defaultMarkdownParser } from "prosemirror-markdown";
@@ -67,7 +135,7 @@ This is **bold** and *italic* text.
 
 ## Direct ProseMirror Node
 
-直接构建 ProseMirror Node 对象：
+Return fully constructed ProseMirror nodes:
 
 ```typescript
 import { schema } from "prosemirror-schema-basic";
@@ -75,7 +143,7 @@ import { schema } from "prosemirror-schema-basic";
 const nodePlugin = createCompletionPlugin({
   debounceMs: 500,
   callCompletion: async (context) => {
-    // 创建带格式的段落
+    // Create a formatted paragraph
     const paragraph = schema.nodes.paragraph.create(
       null,
       schema.text("Bold text", [schema.marks.strong.create()])
@@ -98,7 +166,7 @@ const mockPlugin = createCompletionPlugin({
       return `// TODO: Complete this code\n// ${context.beforeText.slice(-30)}`;
     }
 
-    return `继续: ${context.beforeText.slice(-20)}`;
+    return `Continue: ${context.beforeText.slice(-20)}`;
   },
   getPromptType: (context) => {
     if (context.beforeText.includes("\`\`\`")) {

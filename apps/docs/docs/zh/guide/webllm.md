@@ -1,24 +1,21 @@
-# WebLLM Integration
+# WebLLM 集成
 
-ProseMirror Completion integrates seamlessly with [WebLLM](https://github.com/mlc-ai/web-llm) for browser-based LLM inference.
+ProseMirror Completion 可以与 [WebLLM](https://github.com/mlc-ai/web-llm) 无缝结合，在浏览器内完成 LLM 推理。
 
-## Installation
+## 安装
 
 ```bash
 npm install @mlc-ai/web-llm
 ```
 
-## Basic Integration
+## 基础集成
 
-```typescript
+```ts
 import { CreateMLCEngine } from "@mlc-ai/web-llm";
 import { createCompletionPlugin } from "@prosemirror-completion/plugin";
 
 async function webLLMCallCompletion(context) {
-  const engine = await CreateMLCEngine(
-    "Llama-3.1-8B-Instruct-q4f32_1-MLC"
-  );
-
+  const engine = await CreateMLCEngine("Llama-3.1-8B-Instruct-q4f32_1-MLC");
   const prompt = `Continue the following text:\n\n${context.beforeText}\n\nContinue:`;
 
   const response = await engine.chat.completions.create({
@@ -35,17 +32,13 @@ const completionPlugin = createCompletionPlugin({
 });
 ```
 
-## With Prompt Builder
+## 搭配 Prompt Builder
 
-```typescript
+```ts
 import { buildPrompt } from "@prosemirror-completion/plugin/prompts";
 
 async function webLLMCallCompletion(context) {
-  const engine = await CreateMLCEngine(
-    "Llama-3.1-8B-Instruct-q4f32_1-MLC"
-  );
-
-  // Use built-in prompt builder
+  const engine = await CreateMLCEngine("Llama-3.1-8B-Instruct-q4f32_1-MLC");
   const prompt = buildPrompt(context);
 
   const response = await engine.chat.completions.create({
@@ -58,11 +51,11 @@ async function webLLMCallCompletion(context) {
 }
 ```
 
-## Caching the Engine
+## 缓存引擎
 
-For better performance, cache the engine instance:
+下载模型较耗时，可缓存 `CreateMLCEngine` 返回的 promise：
 
-```typescript
+```ts
 let enginePromise: Promise<ReturnType<typeof CreateMLCEngine>> | null = null;
 
 async function getEngine() {
@@ -74,36 +67,29 @@ async function getEngine() {
 
 async function webLLMCallCompletion(context) {
   const engine = await getEngine();
-
   const response = await engine.chat.completions.create({
     messages: [{ role: "user", content: context.beforeText }],
     temperature: 0.7,
     max_tokens: 100,
   });
-
   return response.choices[0]?.message?.content ?? "";
 }
 ```
 
-## Model Selection
+## 模型选择
 
-WebLLM supports various models:
+|模型|体积|适用场景|
+|----|----|--------|
+|Llama-3.1-8B|4.5GB|通用场景|
+|Llama-3.1-70B|40GB|高质量输出|
+|Phi-3-mini|1.8GB|低延迟、轻量化|
+|Qwen2.5-7B|4.1GB|多语言场景|
 
-|Model|Size|Best For|
-|-----|----|--------|
-|Llama-3.1-8B|4.5GB|General purpose|
-|Llama-3.1-70B|40GB|High quality|
-|Phi-3-mini|1.8GB|Fast, efficient|
-|Qwen2.5-7B|4.1GB|Multilingual|
+## 支持取消
 
-## Abort Support
-
-WebLLM supports request cancellation:
-
-```typescript
+```ts
 async function webLLMCallCompletion(context) {
   const engine = await getEngine();
-
   const response = await engine.chat.completions.create(
     {
       messages: [{ role: "user", content: context.beforeText }],
@@ -111,9 +97,8 @@ async function webLLMCallCompletion(context) {
     },
     { signal: context.abortController.signal }
   );
-
   return response.choices[0]?.message?.content ?? "";
 }
 ```
 
-This allows the plugin to cancel pending requests when the user continues typing.
+当用户继续输入时，插件会触发 `abortController` 取消请求，避免卡顿。

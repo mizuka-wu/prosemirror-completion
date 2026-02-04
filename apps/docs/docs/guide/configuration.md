@@ -2,6 +2,8 @@
 
 ## Plugin Options
 
+Configure how the completion plugin behaves.
+
 ```typescript
 interface CompletionOptions {
   /**
@@ -75,7 +77,7 @@ interface CompletionContext {
 
 ## Completion Result
 
-The completion function can return:
+The completion function can return multiple shapes of data:
 
 ```typescript
 // Simple string

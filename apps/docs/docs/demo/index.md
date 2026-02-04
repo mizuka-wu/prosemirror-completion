@@ -1,27 +1,27 @@
 # Demo Application
 
-运行 `apps/demo` 可以体验所有补全模式（Mock、HTML、Markdown、ProseMirror、WebLLM）。
+Run `apps/demo` to try every completion mode (Mock, HTML, Markdown, ProseMirror Node, WebLLM).
 
-## 开发环境
+## Development
 
 ```bash
 pnpm install
 pnpm --filter demo dev
 ```
 
-访问 `http://localhost:5173/` 即可切换不同 Tab 体验各示例。
+Open `http://localhost:5173/` and switch between tabs to preview each scenario.
 
-## 生产构建
+## Production Build
 
 ```bash
 pnpm --filter demo build
 pnpm --filter demo preview
 ```
 
-## 主要功能
+## Features
 
-- **Mock**：基础纯文本补全
-- **HTML**：直接插入富文本格式
-- **Markdown**：使用 `prosemirror-markdown` 解析后插入
-- **ProseMirror Node**：返回 Schema 支持的 Node 对象
-- **WebLLM**：调用浏览器内置 LLM 生成补全
+- **Mock** – Basic plain-text completion
+- **HTML** – Directly insert rich HTML markup
+- **Markdown** – Parse Markdown via `prosemirror-markdown`
+- **ProseMirror Node** – Return schema-safe nodes
+- **WebLLM** – Browser LLM-powered completion

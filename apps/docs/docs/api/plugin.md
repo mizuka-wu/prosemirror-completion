@@ -14,17 +14,17 @@ function createCompletionPlugin(
 
 #### `CompletionOptions`
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `debounceMs` | `number` | `300` | Delay before triggering completion |
-| `minTriggerLength` | `number` | `3` | Minimum characters to trigger |
-| `callCompletion` | `function` | required | Completion function |
-| `getPromptType` | `function` | - | Detect prompt type from context |
-| `onChange` | `function` | - | Callback when typing |
-| `onExit` | `function` | - | Callback when completion cancelled |
-| `onApply` | `function` | - | Callback when completion applied |
-| `ghostClassName` | `string` | `"prosemirror-ghost-text"` | CSS class for ghost text |
-| `showGhost` | `boolean` | `true` | Whether to show ghost text |
+|Property|Type|Default|Description|
+|--------|----|-------|-----------|
+|`debounceMs`|`number`|`300`|Delay before triggering completion|
+|`minTriggerLength`|`number`|`3`|Minimum characters to trigger|
+|`callCompletion`|`function`|required|Completion function|
+|`getPromptType`|`function`|-|Detect prompt type from context|
+|`onChange`|`function`|-|Callback when typing|
+|`onExit`|`function`|-|Callback when completion cancelled|
+|`onApply`|`function`|-|Callback when completion applied|
+|`ghostClassName`|`string`|`"prosemirror-ghost-text"`|CSS class for ghost text|
+|`showGhost`|`boolean`|`true`|Whether to show ghost text|
 
 ### Example
 
@@ -102,12 +102,10 @@ return {
 
 ### ProseMirror Node
 
-直接返回 ProseMirror Node 对象，支持完整的文档结构：
-
 ```typescript
 import { schema } from "prosemirror-schema-basic";
 
-// 创建带格式的段落
+// Create a formatted paragraph
 const paragraph = schema.nodes.paragraph.create(
   null,
   schema.text("Bold text", [schema.marks.strong.create()])
@@ -115,8 +113,6 @@ const paragraph = schema.nodes.paragraph.create(
 
 return { prosemirror: paragraph };
 ```
-
-配合 prosemirror-markdown 使用：
 
 ```typescript
 import { defaultMarkdownParser } from "prosemirror-markdown";
