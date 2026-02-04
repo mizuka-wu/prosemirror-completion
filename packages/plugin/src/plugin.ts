@@ -218,6 +218,10 @@ export function createCompletionPlugin(
                 beforePreview: beforeText.slice(-40),
               });
 
+              if (options.onChange) {
+                options.onChange(context, view);
+              }
+
               // 调用补全函数
               const result = await Promise.resolve(
                 options.callCompletion(context),
@@ -239,11 +243,6 @@ export function createCompletionPlugin(
                   pos,
                 }),
               );
-
-              // 调用 onChange 回调
-              if (options.onChange) {
-                options.onChange(context, view);
-              }
             } catch (error) {
               if (abortController.signal.aborted) {
                 return;

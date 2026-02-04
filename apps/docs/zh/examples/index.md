@@ -185,4 +185,4 @@ createCompletionPlugin({
 
 ## 完整 Demo
 
-访问 [demo 应用](/zh/demo/) 可体验 Mock / HTML / Markdown / ProseMirror / WebLLM 全模式。
+访问 [实时 Demo](/zh/examples/live-demo) 可体验 Mock / HTML / Markdown / ProseMirror / WebLLM 全模式。

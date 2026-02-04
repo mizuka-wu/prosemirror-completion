@@ -11,9 +11,9 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View Examples
-      link: /examples/
+      link: ./examples/vue-webllm
 features:
-  - title: Seamless Integration
+  - title: WebLLM Integration Guide
     details: Works with any ProseMirror editor via minimal configuration.
   - title: Transparent Ghost Text
     details: Ghost suggestions sit on top of current text without interrupting typing.
