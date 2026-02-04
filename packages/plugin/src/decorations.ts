@@ -13,7 +13,7 @@ import type {
 export function createGhostDecoration(
   pos: number,
   result: CompletionResult,
-  options: CompletionOptions
+  options: CompletionOptions,
 ): Decoration {
   const dom = document.createElement("span");
   dom.className = options.ghostClassName ?? "prosemirror-ghost-text";
@@ -58,13 +58,16 @@ export function parseCompletionResult(result: CompletionResult): string {
  */
 export function createCompletionFragment(
   result: CompletionResult,
-  state: EditorState
+  state: EditorState,
 ): { text: string; html?: string; node?: Node } {
   if (typeof result === "string") {
     return { text: result };
   }
   if ("prosemirror" in result) {
-    return { text: result.prosemirror.textContent ?? "", node: result.prosemirror };
+    return {
+      text: result.prosemirror.textContent ?? "",
+      node: result.prosemirror,
+    };
   }
   if ("plain" in result && "html" in result) {
     return { text: result.plain, html: result.html };
@@ -99,13 +102,24 @@ export function updateGhostDecoration(
   pluginState: CompletionPluginState,
   pos: number,
   result: CompletionResult,
-  options: CompletionOptions
+  options: CompletionOptions,
 ): DecorationSet {
-  if (!options.showGhost || !result || !state) {
+  const shouldShowGhost = options.showGhost ?? true;
+  if (!shouldShowGhost || !result || !state) {
+    if (options.debug) {
+      console.log("[prosemirror-completion] Skip ghost decoration", {
+        hasResult: Boolean(result),
+        hasState: Boolean(state),
+        showGhost: options.showGhost,
+      });
+    }
     return emptyDecorations(state);
   }
 
   const deco = createGhostDecoration(pos, result, options);
+  if (options.debug) {
+    console.log("[prosemirror-completion] Create ghost decoration", { pos });
+  }
   return DecorationSet.create(state.doc, [deco]);
 }
 

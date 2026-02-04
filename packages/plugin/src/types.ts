@@ -99,6 +99,8 @@ export interface CompletionOptions {
   debug?: boolean;
 }
 
+export interface ResolvedCompletionOptions extends Required<CompletionOptions> {}
+
 /**
  * 内部插件状态
  */

@@ -4,6 +4,7 @@ import type {
   CompletionOptions,
   CompletionPluginState,
   CompletionAction,
+  ResolvedCompletionOptions,
 } from "./types";
 import { completionPluginKey } from "./types";
 import {
@@ -23,12 +24,28 @@ import { insertCompletion } from "./commands";
 /**
  * 创建补全插件
  */
+function resolveOptions(options: CompletionOptions): ResolvedCompletionOptions {
+  return {
+    debounceMs: options.debounceMs ?? 300,
+    minTriggerLength: options.minTriggerLength ?? 3,
+    callCompletion: options.callCompletion,
+    getPromptType: options.getPromptType ?? defaultGetPromptType,
+    onChange: options.onChange ?? (() => {}),
+    onExit: options.onExit ?? (() => {}),
+    onApply: options.onApply ?? (() => {}),
+    ghostClassName: options.ghostClassName ?? "prosemirror-ghost-text",
+    showGhost: options.showGhost ?? true,
+    debug: options.debug ?? false,
+  };
+}
+
 export function createCompletionPlugin(
-  options: CompletionOptions,
+  initOptions: CompletionOptions,
 ): Plugin<CompletionPluginState> {
-  const debounceMs = options.debounceMs ?? 300;
-  const minTriggerLength = options.minTriggerLength ?? 3;
-  const debugEnabled = options.debug ?? false;
+  const options = resolveOptions(initOptions);
+  const debounceMs = options.debounceMs;
+  const minTriggerLength = options.minTriggerLength;
+  const debugEnabled = options.debug;
   const debugLog = (...args: unknown[]) => {
     if (!debugEnabled) return;
     console.log("[prosemirror-completion]", ...args);

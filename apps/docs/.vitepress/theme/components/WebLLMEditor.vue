@@ -56,6 +56,8 @@ const messages = {
     generating: "Generating suggestion…",
     inserted: "Completion inserted. Keep typing!",
     dismissed: "Completion dismissed.",
+    readyStatus: "WebLLM ready. AI modes are available.",
+    errorStatus: "Failed to load WebLLM. Click to retry.",
   },
   zh: {
     preloadButton: "预加载 WebLLM",
@@ -69,6 +71,8 @@ const messages = {
     generating: "正在生成建议…",
     inserted: "已插入补全，继续输入吧！",
     dismissed: "补全已取消。",
+    readyStatus: "WebLLM 已可使用。",
+    errorStatus: "加载失败，请重试。",
   },
 };
 
@@ -85,6 +89,12 @@ const buttonLabel = computed(() =>
 const hintHtml = computed(() => localeText.value.hint);
 const warmupNote = computed(() => localeText.value.warmup);
 const showWarmupNote = computed(() => webllmStatus.value !== "ready");
+const storeMessages = computed(() => ({
+  idle: localeText.value.warmup,
+  loading: localeText.value.loading,
+  ready: localeText.value.readyStatus,
+  error: localeText.value.errorStatus,
+}));
 const isClient = typeof window !== "undefined";
 
 let view: EditorView | null = null;
@@ -94,7 +104,12 @@ const schema = new Schema({
   marks: basicSchema.spec.marks,
 });
 
-const { ensureEngine, status: webllmStatus, message: webllmMessage } = useWebLLM();
+const {
+  ensureEngine,
+  status: webllmStatus,
+  message: webllmMessage,
+  messageKey: webllmMessageKey,
+} = useWebLLM();
 
 const completionPlugin = createCompletionPlugin({
   debounceMs: 500,
@@ -165,7 +180,7 @@ function createEditor(): boolean {
 }
 
 async function preloadWebLLM() {
-  await ensureEngine();
+  await ensureEngine(storeMessages.value);
 }
 
 watch(
@@ -182,7 +197,7 @@ onMounted(() => {
   if (editorContainer.value) {
     createEditor();
   }
-  void ensureEngine();
+  void ensureEngine(storeMessages.value);
 });
 
 onBeforeUnmount(() => {
@@ -192,36 +207,27 @@ onBeforeUnmount(() => {
   }
 });
 
-const syncStatusByLocale = () => {
-  if (webllmStatus.value === "idle") {
-    statusText.value = localeText.value.warmup;
-  } else if (webllmStatus.value === "loading") {
-    statusText.value = localeText.value.loading;
-  } else if (webllmStatus.value === "ready") {
-    statusText.value = webllmMessage.value || localeText.value.readyButton;
+const getStoreStatusText = () => {
+  switch (webllmMessageKey.value) {
+    case "idle":
+      return localeText.value.warmup;
+    case "loading":
+      return localeText.value.loading;
+    case "ready":
+      return localeText.value.readyStatus;
+    case "error":
+      return localeText.value.errorStatus;
+    case "custom":
+    default:
+      return webllmMessage.value;
   }
 };
 
-watch(localeText, () => {
-  syncStatusByLocale();
-});
-
-watch(webllmMessage, (val) => {
-  if (webllmStatus.value === "idle") {
-    statusText.value = localeText.value.warmup;
+watch([localeText, webllmMessageKey, webllmMessage], () => {
+  if (webllmMessageKey.value !== "custom") {
+    statusText.value = getStoreStatusText();
     return;
   }
-  if (webllmStatus.value === "loading") {
-    statusText.value = localeText.value.loading;
-    return;
-  }
-  statusText.value = val;
-});
-
-watch(webllmStatus, () => {
-  syncStatusByLocale();
-  if (webllmStatus.value === "ready" && webllmMessage.value) {
-    statusText.value = webllmMessage.value;
-  }
+  statusText.value = webllmMessage.value;
 });
 </script>

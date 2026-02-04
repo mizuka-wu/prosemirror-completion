@@ -87,6 +87,12 @@
   line-height: 1.5;
 }
 
+.webllm-editor__surface .prosemirror-ghost-text {
+  color: var(--vp-c-brand-dark, #1d4ed8);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .webllm-editor__surface .ProseMirror-menubar {
   display: flex;
   flex-wrap: wrap;
