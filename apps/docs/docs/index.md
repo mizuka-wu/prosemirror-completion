@@ -4,7 +4,7 @@ title: ProseMirror Completion
 hero:
   name: ProseMirror Completion
   text: Copilot-style completion experience for ProseMirror editors
-  tagline: Ghost text, invisible triggers, and customizable workflows powered by @prosemirror-completion/plugin.
+  tagline: Ghost text, invisible triggers, and customizable workflows powered by prosemirror-completion.
   actions:
     - theme: brand
       text: Get Started
