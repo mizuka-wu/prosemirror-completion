@@ -1,6 +1,6 @@
 # ProseMirror Completion
 
-<Copilot-style text completion plugin for ProseMirror, inspired by GitHub Copilot.
+> Copilot-style text completion plugin for ProseMirror, inspired by GitHub Copilot.
 
 ## Features
 
