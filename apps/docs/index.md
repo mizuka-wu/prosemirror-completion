@@ -25,7 +25,7 @@ features:
 
 - ✨ **Invisible Trigger**: Automatically reacts to typing context without extra shortcuts.
 - 🎯 **Fine-grained Control**: Customize debounce, AbortController, and prompt builders.
-- 🤖 **WebLLM Ready**: Optional browser LLM integration example included in the demo.
+- 🤖 **Background AI Ready**: Plug into any LLM stack (e.g., WebLLM) without changing editor code.
 - 🧩 **Plugin-first Design**: Every capability is exposed as a plugin for effortless reuse.
 
 ## Quick Start
@@ -47,3 +47,10 @@ const plugin = createCompletionPlugin({
 ```
 
 Continue with the [Guide](/guide/) to configure the plugin and connect to WebLLM.
+
+## Interactive Demo
+
+Experience the basic integration (ProseMirror + completion plugin + WebLLM) directly below.
+
+<!-- markdownlint-disable-next-line MD033 -->
+<WebLLMEditor />

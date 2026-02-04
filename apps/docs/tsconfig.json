@@ -1,9 +1,11 @@
 {
   "extends": "../../packages/typescript-config/vite.json",
   "include": [
-    "docs/.vitepress/**/*.ts",
-    "docs/.vitepress/**/*.mts",
-    "docs/.vitepress/**/*.cts",
-    "docs/.vitepress/**/*.tsx"
+    ".vitepress/**/*.ts",
+    ".vitepress/**/*.mts",
+    ".vitepress/**/*.cts",
+    ".vitepress/**/*.tsx",
+    ".vitepress/**/*.vue",
+    "env.d.ts"
   ]
 }

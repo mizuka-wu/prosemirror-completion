@@ -79,7 +79,7 @@ importers:
         specifier: ^0.2.78
         version: 0.2.80
       '@prosemirror-completion/plugin':
-        specifier: ^0.0.1
+        specifier: workspace:*
         version: link:../../packages/plugin
       prosemirror-example-setup:
         specifier: ^1.2.3

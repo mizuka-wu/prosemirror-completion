@@ -91,6 +91,12 @@ export interface CompletionOptions {
    * @default true
    */
   showGhost?: boolean;
+
+  /**
+   * 调试模式，开启后会在控制台输出关键日志
+   * @default false
+   */
+  debug?: boolean;
 }
 
 /**

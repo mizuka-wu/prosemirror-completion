@@ -10,8 +10,8 @@ export default defineConfig({
       description: "Copilot-style text completion plugin for ProseMirror",
       themeConfig: {
         nav: [
+          { text: "Home", link: "/" },
           { text: "Guide", link: "/guide/" },
-          { text: "API", link: "/api/" },
           { text: "Examples", link: "/examples/" },
         ],
         sidebar: {
@@ -26,21 +26,12 @@ export default defineConfig({
               ],
             },
           ],
-          "/api/": [
-            {
-              text: "API Reference",
-              items: [
-                { text: "Plugin", link: "/api/plugin" },
-                { text: "Types", link: "/api/types" },
-                { text: "Utils", link: "/api/utils" },
-              ],
-            },
-          ],
           "/examples/": [
             {
               text: "Examples",
               items: [
                 { text: "Overview", link: "/examples/" },
+                { text: "Live Demo", link: "/examples/live-demo" },
                 { text: "Vue + WebLLM", link: "/examples/vue-webllm" },
               ],
             },
@@ -56,8 +47,8 @@ export default defineConfig({
       description: "面向 ProseMirror 的 Copilot 风格补全插件",
       themeConfig: {
         nav: [
+          { text: "首页", link: "/zh/" },
           { text: "指南", link: "/zh/guide/" },
-          { text: "API", link: "/zh/api/" },
           { text: "示例", link: "/zh/examples/" },
         ],
         sidebar: {
@@ -72,21 +63,12 @@ export default defineConfig({
               ],
             },
           ],
-          "/zh/api/": [
-            {
-              text: "API",
-              items: [
-                { text: "插件", link: "/zh/api/plugin" },
-                { text: "类型", link: "/zh/api/types" },
-                { text: "工具", link: "/zh/api/utils" },
-              ],
-            },
-          ],
           "/zh/examples/": [
             {
               text: "示例",
               items: [
                 { text: "概览", link: "/zh/examples/" },
+                { text: "实时 Demo", link: "/zh/examples/live-demo" },
                 { text: "Vue + WebLLM", link: "/zh/examples/vue-webllm" },
               ],
             },

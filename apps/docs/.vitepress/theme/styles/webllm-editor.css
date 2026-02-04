@@ -1,0 +1,111 @@
+.webllm-editor {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: var(--vp-c-bg-soft);
+  margin-top: 1.5rem;
+}
+
+.webllm-editor__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.webllm-editor__button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 1.25rem;
+  background: var(--vp-c-brand);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.webllm-editor__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.webllm-editor__status-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+.webllm-editor__status {
+  font-size: 0.9rem;
+  color: var(--vp-c-text-2);
+}
+
+.webllm-editor__progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--vp-c-divider);
+  overflow: hidden;
+}
+
+.webllm-editor__progress-bar {
+  width: 45%;
+  height: 100%;
+  background: var(--vp-c-brand);
+  border-radius: inherit;
+  animation: webllm-progress 1.2s ease-in-out infinite;
+}
+
+@keyframes webllm-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(10%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.webllm-editor__surface {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: #fff;
+  min-height: 320px;
+  padding: 0.5rem;
+}
+
+.webllm-editor__surface .ProseMirror {
+  min-height: 280px;
+  outline: none;
+  color: var(--vp-c-text-3);
+  line-height: 1.5;
+}
+
+.webllm-editor__surface .ProseMirror-menubar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  border-bottom: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.webllm-editor__surface .ProseMirror-menubar button {
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+}
+
+.webllm-editor__hint {
+  font-size: 0.85rem;
+  color: var(--vp-c-text-2);
+  margin-top: 0.75rem;
+}

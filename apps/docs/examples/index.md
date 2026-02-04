@@ -257,9 +257,41 @@ createCompletionPlugin({
 });
 ```
 
+## Prompt Templates
+
+Provide a default prompt builder so downstream apps share a consistent completion style:
+
+```typescript
+const basePrompt = ({ beforeText, promptType }: CompletionContext) => {
+  return `You are a helpful ${promptType} assistant. Continue the user input in the same tone.
+
+Context (last 120 chars):
+${beforeText.slice(-120)}
+
+Rules:
+- Keep the completion under 40 words.
+- Do not repeat existing text.
+- Finish the sentence naturally.`;
+};
+
+const promptAwarePlugin = createCompletionPlugin({
+  callCompletion: async (context) => {
+    const prompt = basePrompt(context);
+    return fetchLLM(prompt);
+  },
+  getPromptType: (context) => {
+    if (context.parent.type.name === "code_block") return "code";
+    if (context.beforeText.includes("#")) return "markdown";
+    return "common";
+  },
+});
+```
+
+> Tip: expose `basePrompt` as a shared utility so other teams can reuse the same tone/structure.
+
 ## Full Demo
 
-See the [demo app](../demo/) for a complete working example with all completion modes:
+See the [Live Demo](/examples/live-demo) for a complete working example with all completion modes:
 
 - **Mock** - Basic text completion
 - **HTML** - Rich text with HTML formatting
