@@ -9,21 +9,49 @@ const externals = [
   "prosemirror-view",
 ];
 
+const globals = {
+  "prosemirror-model": "ProseMirrorModel",
+  "prosemirror-state": "ProseMirrorState",
+  "prosemirror-transform": "ProseMirrorTransform",
+  "prosemirror-view": "ProseMirrorView",
+};
+
 export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "ProseMirrorCompletion",
-      formats: ["es", "cjs"],
-      fileName: (format) => (format === "es" ? "index.mjs" : "index.cjs"),
     },
     sourcemap: true,
     emptyOutDir: true,
     rollupOptions: {
       external: externals,
-      output: {
-        exports: "named",
-      },
+      output: [
+        {
+          format: "es",
+          entryFileNames: "index.mjs",
+          exports: "named",
+        },
+        {
+          format: "cjs",
+          entryFileNames: "index.cjs",
+          exports: "named",
+        },
+        {
+          format: "umd",
+          entryFileNames: "index.umd.js",
+          name: "ProseMirrorCompletion",
+          exports: "named",
+          globals,
+        },
+        {
+          format: "iife",
+          entryFileNames: "index.iife.js",
+          name: "ProseMirrorCompletion",
+          exports: "named",
+          globals,
+        },
+      ],
     },
     outDir: "dist",
   },
