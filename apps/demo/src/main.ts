@@ -5,21 +5,24 @@ import { schema as basicSchema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
 import { defaultMarkdownParser } from "prosemirror-markdown";
 import { createCompletionPlugin } from "@prosemirror-completion/plugin";
-import type { CompletionContext, CompletionResult } from "@prosemirror-completion/plugin";
+import type {
+  CompletionContext,
+  CompletionResult,
+} from "@prosemirror-completion/plugin";
 import type { Node } from "prosemirror-model";
 import "./style.css";
 import "prosemirror-view/style/prosemirror.css";
 import "prosemirror-example-setup/style/style.css";
 
-// 创建 schema
+// Create schema
 const schema = new Schema({
   nodes: basicSchema.spec.nodes,
   marks: basicSchema.spec.marks,
 });
 
-// ============ 1. 基础 Mock 补全 ============
+// ============ 1. Basic mock completion ============
 async function mockCallCompletion(
-  context: CompletionContext
+  context: CompletionContext,
 ): Promise<CompletionResult> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const beforeText = context.beforeText;
@@ -27,41 +30,41 @@ async function mockCallCompletion(
   if (context.promptType === "code") {
     return `// TODO: Implement based on:\n// ${beforeText.slice(-50)}`;
   } else if (context.promptType === "markdown") {
-    return `**继续写作**: 基于 "${beforeText.slice(-30)}..."`;
+    return `**Keep writing**: based on "${beforeText.slice(-30)}..."`;
   } else {
-    return `这是基于 "${beforeText.slice(-30)}" 的补全内容。`;
+    return `This completion is based on "${beforeText.slice(-30)}".`;
   }
 }
 
-// ============ 2. HTML 富文本补全 ============
+// ============ 2. HTML rich-text completion ============
 async function htmlCallCompletion(
-  context: CompletionContext
+  context: CompletionContext,
 ): Promise<CompletionResult> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const beforeText = context.beforeText;
 
   return {
-    plain: `粗体和斜体文本示例`,
-    html: `<p>这是<strong>粗体</strong>和<em>斜体</em>的示例，基于: ${beforeText.slice(-20)}</p>`
+    plain: `Bold and italic text example`,
+    html: `<p>This is an example of <strong>bold</strong> and <em>italic</em> text based on: ${beforeText.slice(-20)}</p>`,
   };
 }
 
-// ============ 3. Markdown 转 ProseMirror Node ============
+// ============ 3. Markdown to ProseMirror node ============
 async function markdownCallCompletion(
-  context: CompletionContext
+  context: CompletionContext,
 ): Promise<CompletionResult> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const beforeText = context.beforeText;
 
   const markdownContent = `
-## 基于 "${beforeText.slice(-30)}" 的建议
+## Suggestions based on "${beforeText.slice(-30)}"
 
-这是一个 **Markdown** 格式的内容示例。
+This is an example of **Markdown** content.
 
-- 支持列表项
-- 支持*斜体*和**粗体**
+- Supports list items
+- Supports *italic* and **bold**
 
-> 这是一个引用块
+> This is a block quote
 `;
 
   const parsedNode = defaultMarkdownParser.parse(markdownContent);
@@ -73,24 +76,22 @@ async function markdownCallCompletion(
   return markdownContent;
 }
 
-// ============ 4. 直接返回 ProseMirror Node ============
+// ============ 4. Return ProseMirror node directly ============
 async function prosemirrorNodeCompletion(
-  context: CompletionContext
+  context: CompletionContext,
 ): Promise<CompletionResult> {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   const paragraph = schema.nodes.paragraph.create(
     null,
-    schema.text("这是直接构建的 ProseMirror Node", [
-      schema.marks.strong.create()
-    ])
+    schema.text("This node is constructed directly", [
+      schema.marks.strong.create(),
+    ]),
   );
 
   const paragraph2 = schema.nodes.paragraph.create(
     null,
-    schema.text("支持富文本格式", [
-      schema.marks.em.create()
-    ])
+    schema.text("Supports rich text formatting", [schema.marks.em.create()]),
   );
 
   const doc = schema.nodes.doc.create(null, [paragraph, paragraph2]);
@@ -98,9 +99,9 @@ async function prosemirrorNodeCompletion(
   return { prosemirror: doc };
 }
 
-// ============ 5. WebLLM 真实 AI 补全 ============
+// ============ 5. WebLLM AI completion ============
 async function webLLMCallCompletion(
-  context: CompletionContext
+  context: CompletionContext,
 ): Promise<CompletionResult> {
   const { CreateMLCEngine } = await import("@mlc-ai/web-llm");
   const engine = await CreateMLCEngine("Llama-3.1-8B-Instruct-q4f32_1-MLC");
@@ -116,10 +117,13 @@ async function webLLMCallCompletion(
   return response.choices[0]?.message?.content ?? "";
 }
 
-// 补全函数映射
+// Completion handler mapping
 type CompletionMode = "mock" | "html" | "markdown" | "prosemirror" | "webllm";
 
-const completionHandlers: Record<CompletionMode, (context: CompletionContext) => Promise<CompletionResult>> = {
+const completionHandlers: Record<
+  CompletionMode,
+  (context: CompletionContext) => Promise<CompletionResult>
+> = {
   mock: mockCallCompletion,
   html: htmlCallCompletion,
   markdown: markdownCallCompletion,
@@ -128,14 +132,14 @@ const completionHandlers: Record<CompletionMode, (context: CompletionContext) =>
 };
 
 const modeDescriptions: Record<CompletionMode, string> = {
-  mock: "基础 Mock 补全 - 返回纯文本",
-  html: "HTML 补全 - 返回 HTML 字符串，解析后插入",
-  markdown: "Markdown 补全 - 使用 prosemirror-markdown 解析",
-  prosemirror: "ProseMirror Node - 直接返回 Node 对象",
-  webllm: "WebLLM - 真实 AI 补全",
+  mock: "Basic mock completion - returns plain text",
+  html: "HTML completion - returns HTML string for insertion",
+  markdown: "Markdown completion - parsed with prosemirror-markdown",
+  prosemirror: "ProseMirror node - returns a Node object directly",
+  webllm: "WebLLM - real AI completion",
 };
 
-// 创建编辑器
+// Create editor
 function createEditor(container: HTMLElement, mode: CompletionMode) {
   const completionPlugin = createCompletionPlugin({
     debounceMs: 500,
@@ -143,13 +147,13 @@ function createEditor(container: HTMLElement, mode: CompletionMode) {
     callCompletion: completionHandlers[mode],
     ghostClassName: "prosemirror-ghost-text",
     showGhost: true,
-    onChange: (context, view) => {
+    onChange: (context: CompletionContext, view: EditorView) => {
       console.log("Completion triggered:", context.promptType);
     },
-    onApply: (result, view) => {
+    onApply: (result: CompletionResult, view: EditorView) => {
       console.log("Completion applied:", result);
     },
-    onExit: (view) => {
+    onExit: (view: EditorView) => {
       console.log("Completion cancelled");
     },
   });
@@ -166,11 +170,11 @@ function createEditor(container: HTMLElement, mode: CompletionMode) {
   return view;
 }
 
-// 初始化应用
+// Initialize app
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="demo-container">
     <h1>ProseMirror Completion Demo</h1>
-    <p class="subtitle">支持多种返回类型的智能补全插件</p>
+    <p class="subtitle">Intelligent completion plugin with multiple return types</p>
     <div class="tabs">
       <button class="tab-button active" data-mode="mock">Mock</button>
       <button class="tab-button" data-mode="html">HTML</button>
@@ -181,18 +185,18 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div id="editor-container"></div>
     <div class="mode-description" id="mode-description"></div>
     <div class="instructions">
-      <p><strong>使用说明：</strong></p>
+      <p><strong>How to use:</strong></p>
       <ul>
-        <li>输入至少 3 个字符触发补全</li>
-        <li><kbd>Tab</kbd> - 接受补全</li>
-        <li><kbd>Esc</kbd> - 取消补全</li>
-        <li>灰色文字是 Ghost Text（建议内容）</li>
+        <li>Type at least 3 characters to trigger completion</li>
+        <li><kbd>Tab</kbd> - Accept completion</li>
+        <li><kbd>Esc</kbd> - Cancel completion</li>
+        <li>Gray text is Ghost Text (suggested content)</li>
       </ul>
     </div>
   </div>
 `;
 
-// 样式
+// Styles
 const style = document.createElement("style");
 style.textContent = `
   .demo-container {
@@ -387,21 +391,21 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// 当前编辑器
+// Current editor instance
 let currentView: EditorView | null = null;
 const container = document.getElementById("editor-container")!;
 const descriptionEl = document.getElementById("mode-description")!;
 
-// 更新模式描述
+// Update mode description
 function updateDescription(mode: CompletionMode) {
-  descriptionEl.textContent = `当前模式: ${modeDescriptions[mode]}`;
+  descriptionEl.textContent = `Current mode: ${modeDescriptions[mode]}`;
 }
 
-// 创建初始编辑器
+// Create initial editor
 currentView = createEditor(container, "mock");
 updateDescription("mock");
 
-// 标签切换
+// Tab switching
 document.querySelectorAll(".tab-button").forEach((btn) => {
   btn.addEventListener("click", () => {
     document
