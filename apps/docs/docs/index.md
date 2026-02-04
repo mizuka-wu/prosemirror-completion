@@ -25,7 +25,7 @@ features:
 
 - ✨ **Invisible Trigger**: Automatically reacts to typing context without extra shortcuts.
 - 🎯 **Fine-grained Control**: Customize debounce, AbortController, and prompt builders.
-- 🤖 **WebLLM Ready**: Built-in browser LLM integration sample.
+- 🤖 **WebLLM Ready**: Optional browser LLM integration example included in the demo.
 - 🧩 **Plugin-first Design**: Every capability is exposed as a plugin for effortless reuse.
 
 ## Quick Start

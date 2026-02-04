@@ -25,7 +25,7 @@ features:
 
 - ✨ **隐形触发器**：根据上下文自动触发补全，无需额外快捷键。
 - 🎯 **精细化控制**：可自定义 debounce、AbortController 与 prompt builder。
-- 🤖 **原生 WebLLM 支持**：提供浏览器端 LLM 推理示例。
+- 🤖 **WebLLM 示例**：Demo 中附带可选的浏览器端 LLM 接入方案。
 - 🧩 **插件化设计**：全部能力都以插件形式暴露，便于复用。
 
 ## 快速上手
