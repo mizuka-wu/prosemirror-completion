@@ -9,9 +9,9 @@ import { insertCompletion } from "./commands";
 export function handleKeyDown(
   view: EditorView,
   event: KeyboardEvent,
-  pluginState: CompletionPluginState
+  pluginState: CompletionPluginState,
 ): boolean {
-  const { activeSuggestion, triggerPos } = pluginState;
+  const { activeSuggestion, triggerPos, options } = pluginState;
 
   // 没有激活的补全时，不拦截
   if (!activeSuggestion || triggerPos === null) {
@@ -21,17 +21,23 @@ export function handleKeyDown(
   // Tab: 应用补全
   if (event.key === "Tab" && !event.shiftKey) {
     event.preventDefault();
+    event.stopPropagation();
+    view.focus();
     // 使用 insertCompletion 实际插入文本
     const tr = insertCompletion(view.state, activeSuggestion);
     view.dispatch(tr);
+    options?.onApply?.(activeSuggestion, view);
     return true;
   }
 
   // Escape: 取消补全
   if (event.key === "Escape") {
     event.preventDefault();
+    event.stopPropagation();
     const action: CompletionAction = { type: "cancel" };
     view.dispatch(view.state.tr.setMeta("prosemirror-completion", action));
+    options?.onExit?.(view);
+    view.focus();
     return true;
   }
 
@@ -44,7 +50,7 @@ export function handleKeyDown(
  */
 export function shouldCancelCompletion(
   view: EditorView,
-  pluginState: CompletionPluginState
+  pluginState: CompletionPluginState,
 ): boolean {
   const { activeSuggestion, triggerPos } = pluginState;
 
