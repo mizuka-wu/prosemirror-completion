@@ -19,14 +19,44 @@ npm install @prosemirror-completion/plugin
 ## Quick Start
 
 ```typescript
+import { EditorState } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { schema } from "prosemirror-schema-basic";
+import { exampleSetup } from "prosemirror-example-setup";
 import { createCompletionPlugin } from "@prosemirror-completion/plugin";
 
 const completionPlugin = createCompletionPlugin({
   debounceMs: 300,
-  callCompletion: async (context) => {
-    return "suggested text";
+  minTriggerLength: 2,
+  getPromptType: (ctx) =>
+    ctx.parent.type.name === "code_block" ? "code" : "common",
+  callCompletion: async ({ beforeText }) => {
+    const lastWord = beforeText.split(/\s+/).pop() ?? "";
+    return lastWord ? `${lastWord}…` : "";
   },
+  debug: import.meta.env.DEV,
 });
+
+const state = EditorState.create({
+  schema,
+  plugins: [...exampleSetup({ schema }), completionPlugin],
+});
+
+const view = new EditorView(document.querySelector("#editor")!, {
+  state,
+});
+```
+
+### Completion result shapes
+
+`callCompletion` 可以返回简单字符串，或包含 HTML、ProseMirror Node 的对象：
+
+```ts
+type CompletionResult =
+  | string
+  | { plain: string; html?: string }
+  | { html: string }
+  | { prosemirror: Node };
 ```
 
 ## Configuration
@@ -44,28 +74,34 @@ const completionPlugin = createCompletionPlugin({
 | `onApply` | `(result, view) => void` | `undefined` | 用户按 `Tab` 接受补全时回调，可用于记录结果 |
 | `ghostClassName` | `string` | `"prosemirror-ghost-text"` | Ghost Text 的自定义样式类名 |
 | `showGhost` | `boolean` | `true` | 是否展示 Ghost Text（可关闭仅保留快捷键行为） |
+| `debug` | `boolean` | `false` | 是否输出调试日志，便于排查触发与请求过程 |
 
 > `CompletionResult` 支持 `string`、`{ plain; html? }`、`{ html }`、`{ prosemirror: Node }`，详见 docs 示例。
 
 ## Project Structure
 
 ```text
-packages/plugin/src/
-├── types.ts       # Type definitions
-├── plugin.ts      # Core plugin implementation
-├── state.ts       # Plugin state management
-├── decorations.ts # Ghost text rendering
-├── keymap.ts      # Keyboard handlers
-├── utils.ts       # Utility functions
-├── prompts.ts     # Prompt builders
-├── commands.ts    # Editor commands
-└── index.ts       # Main exports
+packages/
+├── plugin/
+│   ├── src/
+│   │   ├── commands.ts    # Editor commands
+│   │   ├── decorations.ts # Ghost text rendering
+│   │   ├── index.ts       # Entry exports
+│   │   ├── keymap.ts      # Keyboard handlers
+│   │   ├── plugin.ts      # Core plugin implementation
+│   │   ├── prompts.ts     # Prompt builders
+│   │   ├── types.ts       # Shared types & contexts
+│   │   └── utils.ts       # Helpers (prompt detection, text extraction…)
+│   ├── scripts/postbuild.mjs
+│   └── package.json
+├── eslint-config/         # Shared eslint preset
+└── typescript-config/     # Shared tsconfig presets
 
 apps/
-├── demo/          # Demo application with WebLLM
+├── demo/                  # Playground + Vitest suite
 │   ├── src/main.ts
 │   └── src/completion.test.ts
-└── docs/          # VitePress documentation
+└── docs/                  # VitePress documentation site (en & zh)
     └── docs/
         ├── guide/
         ├── api/
@@ -75,17 +111,20 @@ apps/
 ## Development
 
 ```bash
-# Install dependencies
-npm install
+# Install dependencies (pnpm workspace)
+pnpm install
 
-# Run demo
-cd apps/demo && npm run dev
+# Run the playground demo
+pnpm --filter demo dev
 
-# Run tests
-cd apps/demo && npm run test
+# Run Vitest suite for the demo (covers plugin behaviors)
+pnpm --filter demo test
 
-# Build docs
-cd apps/docs && npm run build
+# Build documentation site
+pnpm --filter docs build
+
+# Build the plugin package
+pnpm --filter @prosemirror-completion/plugin build
 ```
 
 ## Architecture
