@@ -70,13 +70,13 @@ type CompletionResult =
 | `callCompletion` | `(context) => CompletionResult \| Promise<CompletionResult>` | **必填** | 真正的补全函数，返回字符串、HTML 或 ProseMirror Node |
 | `getPromptType` | `(context) => PromptType` | `defaultGetPromptType` | 自定义 prompt 类型推断逻辑（如代码/Markdown 检测） |
 | `onChange` | `(context, view) => void` | `undefined` | 用户持续输入时触发，可用于埋点或实时展示状态 |
-| `onExit` | `(view) => void` | `undefined` | 用户按 `Esc` 或取消补全时回调 |
-| `onApply` | `(result, view) => void` | `undefined` | 用户按 `Tab` 接受补全时回调，可用于记录结果 |
 | `ghostClassName` | `string` | `"prosemirror-ghost-text"` | Ghost Text 的自定义样式类名 |
 | `showGhost` | `boolean` | `true` | 是否展示 Ghost Text（可关闭仅保留快捷键行为） |
 | `debug` | `boolean` | `false` | 是否输出调试日志，便于排查触发与请求过程 |
 
 > `CompletionResult` 支持 `string`、`{ plain; html? }`、`{ html }`、`{ prosemirror: Node }`，详见 docs 示例。
+>
+> 回调层面如果需要在用户接受/取消补全时执行逻辑，可监听并扩展导出的 `approveCompletion`/`exitCompletion` 命令。
 
 ## Project Structure
 

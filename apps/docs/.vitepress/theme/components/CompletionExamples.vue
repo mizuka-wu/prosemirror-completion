@@ -250,7 +250,7 @@ function createEditor(example: ExampleDefinition) {
   }
 
   const scenarioOptions = example.createOptions(helpers);
-  const { onChange, onApply, onExit, ...restOptions } = scenarioOptions;
+  const { onChange, ...restOptions } = scenarioOptions;
 
   const plugin = completion({
     ...restOptions,
@@ -261,14 +261,6 @@ function createEditor(example: ExampleDefinition) {
     onChange: (context, editorView) => {
       statusText.value = localeText.value.generating;
       onChange?.(context, editorView);
-    },
-    onApply: (result, editorView) => {
-      statusText.value = localeText.value.inserted;
-      onApply?.(result, editorView);
-    },
-    onExit: (editorView) => {
-      statusText.value = localeText.value.dismissed;
-      onExit?.(editorView);
     },
   });
 

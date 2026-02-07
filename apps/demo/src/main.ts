@@ -150,12 +150,6 @@ function createEditor(container: HTMLElement, mode: CompletionMode) {
     onChange: (context: CompletionContext, view: EditorView) => {
       console.log("Completion triggered:", context.promptType);
     },
-    onApply: (result: CompletionResult, view: EditorView) => {
-      console.log("Completion applied:", result);
-    },
-    onExit: (view: EditorView) => {
-      console.log("Completion cancelled");
-    },
   });
 
   const state = EditorState.create({

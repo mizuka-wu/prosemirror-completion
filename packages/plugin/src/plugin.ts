@@ -58,8 +58,6 @@ function resolveOptions(options: CompletionOptions): ResolvedCompletionOptions {
     callCompletion: options.callCompletion,
     getPromptType: options.getPromptType ?? defaultGetPromptType,
     onChange: options.onChange ?? (() => {}),
-    onExit: options.onExit ?? (() => {}),
-    onApply: options.onApply ?? (() => {}),
     onError,
     fallbackResult: options.fallbackResult ?? null,
     logger,

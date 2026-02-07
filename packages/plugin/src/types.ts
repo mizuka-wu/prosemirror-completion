@@ -90,20 +90,6 @@ export interface CompletionOptions {
   onChange?: (context: CompletionContext, view: EditorView) => void;
 
   /**
-   * 补全退出时的回调（按 Esc 或点击别处）
-   */
-  onExit?: (view: EditorView, context?: CompletionContext) => void;
-
-  /**
-   * 补全应用时的回调（按 Tab）
-   */
-  onApply?: (
-    result: CompletionResult,
-    view: EditorView,
-    context?: CompletionContext,
-  ) => void;
-
-  /**
    * 补全出错时的回调
    */
   onError?: (error: unknown, context: CompletionContext) => void;

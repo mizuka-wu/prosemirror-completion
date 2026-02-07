@@ -36,15 +36,6 @@ export const approveCompletion: Command = (state, dispatch, view) => {
   const tr = insertCompletion(state, pluginState.activeSuggestion);
   dispatch?.(tr);
 
-  if (view) {
-    const exitContext = pluginState.activeContext ?? undefined;
-    pluginState.options.onApply(
-      pluginState.activeSuggestion,
-      view,
-      exitContext,
-    );
-  }
-
   return true;
 };
 
@@ -55,12 +46,6 @@ export const exitCompletion: Command = (state, dispatch, view) => {
   }
 
   dispatch?.(state.tr.setMeta("prosemirror-completion", { type: "cancel" }));
-
-  if (view) {
-    const exitContext =
-      pluginState.activeContext ?? pluginState.pendingContext ?? undefined;
-    pluginState.options.onExit(view, exitContext);
-  }
 
   return true;
 };
