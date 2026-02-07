@@ -4,7 +4,12 @@ import { Schema, DOMParser } from "prosemirror-model";
 import { schema as basicSchema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
 import { defaultMarkdownParser } from "prosemirror-markdown";
-import { completion } from "@prosemirror-completion/plugin";
+import { keymap } from "prosemirror-keymap";
+import {
+  completion,
+  approveCompletion,
+  exitCompletion,
+} from "@prosemirror-completion/plugin";
 import type {
   CompletionContext,
   CompletionResult,
@@ -152,9 +157,14 @@ function createEditor(container: HTMLElement, mode: CompletionMode) {
     },
   });
 
+  const completionKeymap = keymap({
+    Tab: approveCompletion,
+    Escape: exitCompletion,
+  });
+
   const state = EditorState.create({
     schema,
-    plugins: [...exampleSetup({ schema }), completionPlugin],
+    plugins: [completionPlugin, completionKeymap, ...exampleSetup({ schema })],
   });
 
   const view = new EditorView(container, {
