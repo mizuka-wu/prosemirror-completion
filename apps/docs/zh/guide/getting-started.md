@@ -15,9 +15,14 @@ pnpm add @prosemirror-completion/plugin
 ```ts
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
+import { keymap } from "prosemirror-keymap";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { completion } from "@prosemirror-completion/plugin";
+import {
+  completion,
+  approveCompletion,
+  exitCompletion,
+} from "@prosemirror-completion/plugin";
 
 // 创建补全插件
 const completionPlugin = completion({
@@ -29,10 +34,16 @@ const completionPlugin = completion({
   },
 });
 
+// 绑定 Tab/Esc 到命令
+const completionKeymap = keymap({
+  Tab: approveCompletion,
+  Escape: exitCompletion,
+});
+
 // 创建 EditorState
 const state = EditorState.create({
   schema,
-  plugins: [...exampleSetup({ schema }), completionPlugin],
+  plugins: [completionPlugin, completionKeymap, ...exampleSetup({ schema })],
 });
 
 // 创建 EditorView

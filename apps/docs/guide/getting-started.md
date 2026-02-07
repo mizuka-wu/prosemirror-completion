@@ -15,9 +15,14 @@ pnpm add @prosemirror-completion/plugin
 ```typescript
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
+import { keymap } from "prosemirror-keymap";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { completion } from "@prosemirror-completion/plugin";
+import {
+  completion,
+  approveCompletion,
+  exitCompletion,
+} from "@prosemirror-completion/plugin";
 
 // Create the completion plugin
 const completionPlugin = completion({
@@ -29,10 +34,16 @@ const completionPlugin = completion({
   },
 });
 
+// Wire Tab/Esc to the command helpers
+const completionKeymap = keymap({
+  Tab: approveCompletion,
+  Escape: exitCompletion,
+});
+
 // Create editor state
 const state = EditorState.create({
   schema,
-  plugins: [...exampleSetup({ schema }), completionPlugin],
+  plugins: [completionPlugin, completionKeymap, ...exampleSetup({ schema })],
 });
 
 // Create editor view

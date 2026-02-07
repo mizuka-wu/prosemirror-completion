@@ -35,15 +35,36 @@ pnpm add @prosemirror-completion/plugin
 ```
 
 ```ts
-import { completion } from "@prosemirror-completion/plugin";
+import { EditorState } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { keymap } from "prosemirror-keymap";
+import { schema } from "prosemirror-schema-basic";
+import { exampleSetup } from "prosemirror-example-setup";
+import {
+  completion,
+  approveCompletion,
+  exitCompletion,
+} from "@prosemirror-completion/plugin";
 
-const plugin = completion({
+const completionPlugin = completion({
   debounceMs: 300,
   callCompletion: async (context) => {
     // 自定义补全逻辑
     return "suggested text";
   },
 });
+
+const completionKeymap = keymap({
+  Tab: approveCompletion,
+  Escape: exitCompletion,
+});
+
+const state = EditorState.create({
+  schema,
+  plugins: [completionPlugin, completionKeymap, ...exampleSetup({ schema })],
+});
+
+new EditorView(document.querySelector("#editor")!, { state });
 ```
 
 继续阅读 [指南](/zh/guide/) 了解如何配置插件并接入 WebLLM。

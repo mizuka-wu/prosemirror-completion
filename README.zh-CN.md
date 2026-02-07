@@ -18,15 +18,34 @@ npm install @prosemirror-completion/plugin
 
 ## 快速开始
 
-```typescript
-import { completion } from "@prosemirror-completion/plugin";
+```ts
+import { EditorState } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { keymap } from "prosemirror-keymap";
+import { schema } from "prosemirror-schema-basic";
+import { exampleSetup } from "prosemirror-example-setup";
+import {
+  completion,
+  approveCompletion,
+  exitCompletion,
+} from "@prosemirror-completion/plugin";
 
 const completionPlugin = completion({
   debounceMs: 300,
-  callCompletion: async (context) => {
-    return "建议的文本";
-  },
+  callCompletion: async (context) => "建议的文本",
 });
+
+const completionKeymap = keymap({
+  Tab: approveCompletion,
+  Escape: exitCompletion,
+});
+
+const state = EditorState.create({
+  schema,
+  plugins: [completionPlugin, completionKeymap, ...exampleSetup({ schema })],
+});
+
+const view = new EditorView(document.querySelector("#editor")!, { state });
 ```
 
 ## 项目结构

@@ -21,9 +21,14 @@ npm install @prosemirror-completion/plugin
 ```typescript
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
+import { keymap } from "prosemirror-keymap";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { completion } from "@prosemirror-completion/plugin";
+import {
+  completion,
+  approveCompletion,
+  exitCompletion,
+} from "@prosemirror-completion/plugin";
 
 const completionPlugin = completion({
   debounceMs: 300,
@@ -37,9 +42,14 @@ const completionPlugin = completion({
   debug: import.meta.env.DEV,
 });
 
+const completionKeymap = keymap({
+  Tab: approveCompletion,
+  Escape: exitCompletion,
+});
+
 const state = EditorState.create({
   schema,
-  plugins: [...exampleSetup({ schema }), completionPlugin],
+  plugins: [completionPlugin, completionKeymap, ...exampleSetup({ schema })],
 });
 
 const view = new EditorView(document.querySelector("#editor")!, {

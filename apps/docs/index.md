@@ -35,15 +35,36 @@ pnpm add @prosemirror-completion/plugin
 ```
 
 ```ts
-import { completion } from "@prosemirror-completion/plugin";
+import { EditorState } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { keymap } from "prosemirror-keymap";
+import { schema } from "prosemirror-schema-basic";
+import { exampleSetup } from "prosemirror-example-setup";
+import {
+  completion,
+  approveCompletion,
+  exitCompletion,
+} from "@prosemirror-completion/plugin";
 
-const plugin = completion({
+const completionPlugin = completion({
   debounceMs: 300,
   callCompletion: async (context) => {
     // Customize your completion logic
     return "suggested text";
   },
 });
+
+const completionKeymap = keymap({
+  Tab: approveCompletion,
+  Escape: exitCompletion,
+});
+
+const state = EditorState.create({
+  schema,
+  plugins: [completionPlugin, completionKeymap, ...exampleSetup({ schema })],
+});
+
+new EditorView(document.querySelector("#editor")!, { state });
 ```
 
 Continue with the [Guide](/guide/) to configure the plugin and connect to WebLLM.
