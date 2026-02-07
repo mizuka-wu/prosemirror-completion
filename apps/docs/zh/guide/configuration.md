@@ -73,7 +73,7 @@ return { prosemirror: someNode };
 ### 快速响应
 
 ```ts
-createCompletionPlugin({
+completion({
   debounceMs: 100,
   minTriggerLength: 2,
   callCompletion: myCompletionFn,
@@ -83,7 +83,7 @@ createCompletionPlugin({
 ### 保守策略
 
 ```ts
-createCompletionPlugin({
+completion({
   debounceMs: 800,
   minTriggerLength: 10,
   callCompletion: myCompletionFn,
@@ -93,7 +93,7 @@ createCompletionPlugin({
 ### 代码补全
 
 ```ts
-createCompletionPlugin({
+completion({
   debounceMs: 500,
   getPromptType: (ctx) => {
     if (ctx.parent.type.name === "code_block") {

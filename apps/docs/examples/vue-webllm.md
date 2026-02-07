@@ -39,10 +39,10 @@ Keeping a singleton promise avoids repeated downloads and worker startups.
 
 ```ts
 // completionPlugin.ts
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 import { getEngine } from "./webllm";
 
-export const webLLMPlugin = createCompletionPlugin({
+export const webLLMPlugin = completion({
   debounceMs: 500,
   minTriggerLength: 12,
   callCompletion: async (context) => {

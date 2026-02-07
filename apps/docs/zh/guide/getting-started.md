@@ -17,10 +17,10 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
 // 创建补全插件
-const completionPlugin = createCompletionPlugin({
+const completionPlugin = completion({
   debounceMs: 300,
   minTriggerLength: 3,
   callCompletion: async (context) => {

@@ -358,7 +358,7 @@ const plugin = completion({
         zh: "同时返回 plain 与 html，展示富文本插入能力。",
       },
       badges: ["HTML", "rich-text"],
-      code: String.raw`const plugin = createCompletionPlugin({
+      code: String.raw`const plugin = completion({
   callCompletion: async (context) => {
     return {
       plain: "Bold + italic",

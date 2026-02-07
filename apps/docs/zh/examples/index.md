@@ -18,14 +18,14 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 import { CreateMLCEngine } from "@mlc-ai/web-llm";
 
 const editorEl = ref<HTMLDivElement | null>(null);
 let enginePromise: Promise<ReturnType<typeof CreateMLCEngine>> | null = null;
 const getEngine = () => enginePromise ??= CreateMLCEngine("Llama-3.1-8B-Instruct-q4f32_1-MLC");
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   debounceMs: 400,
   callCompletion: async (context) => {
     const engine = await getEngine();
@@ -70,7 +70,7 @@ onBeforeUnmount(() => view?.destroy());
 ## 基础示例
 
 ```ts
-const completionPlugin = createCompletionPlugin({
+const completionPlugin = completion({
   debounceMs: 300,
   minTriggerLength: 3,
   callCompletion: async (context) => {
@@ -84,7 +84,7 @@ const completionPlugin = createCompletionPlugin({
 返回 HTML 字符串，插件会自动解析并插入格式化内容：
 
 ```ts
-const htmlPlugin = createCompletionPlugin({
+const htmlPlugin = completion({
   debounceMs: 500,
   callCompletion: async () => ({
     plain: "Bold and italic text",
@@ -98,7 +98,7 @@ const htmlPlugin = createCompletionPlugin({
 ```ts
 import { defaultMarkdownParser } from "prosemirror-markdown";
 
-const markdownPlugin = createCompletionPlugin({
+const markdownPlugin = completion({
   callCompletion: async () => {
     const markdown = "## Suggestion\n\nThis is **bold** and *italic* text.";
     const node = defaultMarkdownParser.parse(markdown);
@@ -110,7 +110,7 @@ const markdownPlugin = createCompletionPlugin({
 ## 直接返回 Node
 
 ```ts
-const nodePlugin = createCompletionPlugin({
+const nodePlugin = completion({
   callCompletion: async () => {
     const paragraph = schema.nodes.paragraph.create(
       null,
@@ -124,7 +124,7 @@ const nodePlugin = createCompletionPlugin({
 ## 模拟补全
 
 ```ts
-const mockPlugin = createCompletionPlugin({
+const mockPlugin = completion({
   debounceMs: 500,
   callCompletion: async (context) => {
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -139,7 +139,7 @@ const mockPlugin = createCompletionPlugin({
 ## WebLLM 集成
 
 ```ts
-const webLLMPlugin = createCompletionPlugin({
+const webLLMPlugin = completion({
   debounceMs: 800,
   callCompletion: async (context) => {
     const engine = await getEngine();
@@ -157,7 +157,7 @@ const webLLMPlugin = createCompletionPlugin({
 ## 带回调
 
 ```ts
-const pluginWithCallbacks = createCompletionPlugin({
+const pluginWithCallbacks = completion({
   callCompletion: async () => "suggestion",
   onChange: (context) => console.log("Completion triggered", context.promptType),
   onApply: (result) => console.log("Applied", result),
@@ -177,7 +177,7 @@ const pluginWithCallbacks = createCompletionPlugin({
 ```
 
 ```ts
-createCompletionPlugin({
+completion({
   callCompletion: myCompletionFn,
   ghostClassName: "my-ghost-text",
 });
