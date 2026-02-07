@@ -58,18 +58,6 @@ const view = new EditorView(document.querySelector("#editor"), {
 2. **Ghost text appears**: A gray "ghost" text appears after your cursor showing the suggestion.
 3. **Accept or cancel**: Press `Tab` to accept or use `Esc`/blur to cancel.
 
-## Styling
-
-Add CSS for the ghost text:
-
-```css
-.prosemirror-ghost-text {
-  color: #999;
-  opacity: 0.6;
-  pointer-events: none;
-}
-```
-
 ## Next Steps
 
 - Learn about [Configuration options](./configuration)

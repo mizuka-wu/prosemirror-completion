@@ -58,16 +58,6 @@ const view = new EditorView(document.querySelector("#editor"), {
 2. **幽灵文本展示**：建议以灰色文本显示在光标之后。
 3. **接受或取消**：按 `Tab` 接受，`Esc` 或点击空白处取消。
 
-## 样式
-
-```css
-.prosemirror-ghost-text {
-  color: #999;
-  opacity: 0.6;
-  pointer-events: none;
-}
-```
-
 ## 下一步
 
 - 查看 [配置项说明](/zh/guide/configuration)

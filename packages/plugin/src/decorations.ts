@@ -17,6 +17,7 @@ export function createGhostDecoration(
 ): Decoration {
   const dom = document.createElement("span");
   dom.className = options.ghostClassName ?? "prosemirror-ghost-text";
+  dom.style.opacity = "0.5";
 
   // 解析补全结果
   const text = parseCompletionResult(result);

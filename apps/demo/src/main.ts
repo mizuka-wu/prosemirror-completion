@@ -277,12 +277,6 @@ style.textContent = `
     border-color: #007acc;
     box-shadow: 0 0 0 3px rgba(0,122,204,0.1);
   }
-  .prosemirror-ghost-text {
-    color: #999;
-    opacity: 0.7;
-    pointer-events: none;
-    font-style: italic;
-  }
   .instructions {
     margin-top: 20px;
     padding: 16px;
