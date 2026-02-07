@@ -1,11 +1,11 @@
 # API Reference - Plugin
 
-## createCompletionPlugin
+## completion
 
 Creates the completion plugin instance.
 
 ```typescript
-function createCompletionPlugin(
+function completion(
   options: CompletionOptions
 ): Plugin<CompletionPluginState>
 ```
@@ -29,9 +29,9 @@ function createCompletionPlugin(
 ### Example
 
 ```typescript
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   debounceMs: 500,
   callCompletion: async (context) => {
     return "suggested completion";

@@ -23,9 +23,9 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
-const completionPlugin = createCompletionPlugin({
+const completionPlugin = completion({
   debounceMs: 300,
   minTriggerLength: 2,
   getPromptType: (ctx) =>
@@ -61,7 +61,7 @@ type CompletionResult =
 
 ## Configuration
 
-`createCompletionPlugin` 接受以下可配置项：
+`completion` 接受以下可配置项：
 
 | 选项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -84,14 +84,13 @@ type CompletionResult =
 packages/
 ├── plugin/
 │   ├── src/
-│   │   ├── commands.ts    # Editor commands
 │   │   ├── decorations.ts # Ghost text rendering
 │   │   ├── index.ts       # Entry exports
 │   │   ├── keymap.ts      # Keyboard handlers
 │   │   ├── plugin.ts      # Core plugin implementation
 │   │   ├── prompts.ts     # Prompt builders
 │   │   ├── types.ts       # Shared types & contexts
-│   │   └── utils.ts       # Helpers (prompt detection, text extraction…)
+│   │   └── utils.ts       # Helpers (commands, prompt detection, text extraction…)
 │   ├── scripts/postbuild.mjs
 │   └── package.json
 ├── eslint-config/         # Shared eslint preset

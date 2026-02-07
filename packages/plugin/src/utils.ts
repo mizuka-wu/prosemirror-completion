@@ -1,9 +1,15 @@
-import type { EditorState } from "prosemirror-state";
+import type { EditorState, Transaction } from "prosemirror-state";
+import { TextSelection } from "prosemirror-state";
+import { Node as PMNode } from "prosemirror-model";
 import type {
   CompletionContext,
   CompletionOptions,
+  CompletionPluginState,
+  CompletionResult,
   PromptType,
 } from "./types";
+import { completionPluginKey } from "./types";
+import { parseCompletionResult } from "./decorations";
 
 /**
  * 获取光标前的文本内容
@@ -87,7 +93,7 @@ export function defaultGetPromptType(context: CompletionContext): PromptType {
   if (
     beforeText.includes("```") ||
     /^\s*(function|const|let|var|class|import|export|if|for|while)/.test(
-      beforeText.slice(-50)
+      beforeText.slice(-50),
     )
   ) {
     return "code";
@@ -110,7 +116,7 @@ export function defaultGetPromptType(context: CompletionContext): PromptType {
  */
 export function shouldTriggerCompletion(
   state: EditorState,
-  options: CompletionOptions
+  options: CompletionOptions,
 ): boolean {
   const { from } = state.selection;
   const beforeText = getTextBeforeCursor(state, from);
@@ -129,7 +135,7 @@ export function shouldTriggerCompletion(
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  ms: number
+  ms: number,
 ): (...args: Parameters<T>) => void {
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -142,4 +148,179 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
       timer = null;
     }, ms);
   };
+}
+
+/**
+ * ------------------ Completion Helpers (原 commands.ts) ------------------
+ */
+
+function getCompletionHTML(result: CompletionResult): string | undefined {
+  if (typeof result === "string") {
+    return undefined;
+  }
+  if ("html" in result && result.html !== undefined) {
+    return result.html;
+  }
+  return undefined;
+}
+
+function getCompletionNode(result: CompletionResult): PMNode | undefined {
+  if (typeof result === "string") {
+    return undefined;
+  }
+  if ("prosemirror" in result && result.prosemirror) {
+    return result.prosemirror;
+  }
+  return undefined;
+}
+
+function parseHTMLToFragment(html: string, state: EditorState): PMNode | null {
+  const dom = new DOMParser().parseFromString(html, "text/html");
+
+  try {
+    const nodes: PMNode[] = [];
+    const body = dom.body;
+
+    for (let i = 0; i < body.childNodes.length; i++) {
+      const child = body.childNodes[i];
+      if (child.nodeType === 3) {
+        const text = child.textContent ?? "";
+        if (text) {
+          nodes.push(state.schema.text(text));
+        }
+      } else if (child.nodeType === 1) {
+        const element = child as HTMLElement;
+        const parsed = parseElement(element, state);
+        if (parsed) {
+          nodes.push(parsed);
+        }
+      }
+    }
+
+    if (nodes.length === 0) {
+      return null;
+    }
+
+    return state.schema.nodes.doc.create(null, nodes);
+  } catch {
+    return null;
+  }
+}
+
+function parseElement(element: HTMLElement, state: EditorState): PMNode | null {
+  const tagName = element.tagName.toLowerCase();
+
+  switch (tagName) {
+    case "p":
+      return (
+        state.schema.nodes.paragraph?.create(
+          null,
+          parseInlineContent(element, state),
+        ) ?? null
+      );
+    case "strong":
+    case "b":
+      return state.schema.text(element.textContent ?? "", [
+        state.schema.marks.strong?.create(),
+      ]);
+    case "em":
+    case "i":
+      return state.schema.text(element.textContent ?? "", [
+        state.schema.marks.em?.create(),
+      ]);
+    case "code":
+      return state.schema.text(element.textContent ?? "", [
+        state.schema.marks.code?.create(),
+      ]);
+    case "br":
+      return state.schema.text("\n");
+    default:
+      return state.schema.text(element.textContent ?? "");
+  }
+}
+
+function parseInlineContent(
+  element: HTMLElement,
+  state: EditorState,
+): PMNode[] {
+  const nodes: PMNode[] = [];
+
+  for (let i = 0; i < element.childNodes.length; i++) {
+    const child = element.childNodes[i];
+    if (child.nodeType === 3) {
+      const text = child.textContent ?? "";
+      if (text) {
+        nodes.push(state.schema.text(text));
+      }
+    } else if (child.nodeType === 1) {
+      const parsed = parseElement(child as HTMLElement, state);
+      if (parsed) {
+        nodes.push(parsed);
+      }
+    }
+  }
+
+  return nodes;
+}
+
+export function insertCompletion(
+  state: EditorState,
+  result: CompletionResult,
+): Transaction {
+  const pluginState = completionPluginKey.getState(state) as
+    | CompletionPluginState
+    | undefined;
+
+  if (!pluginState || pluginState.triggerPos === null) {
+    return state.tr;
+  }
+
+  const node = getCompletionNode(result);
+  const html = getCompletionHTML(result);
+  const text = parseCompletionResult(result);
+  const pos = state.selection.from;
+
+  let tr: Transaction;
+  let insertedSize = 0;
+
+  if (node) {
+    tr = state.tr.insert(pos, node.content);
+    insertedSize = tr.doc.content.size - state.doc.content.size;
+  } else if (html) {
+    const fragment = parseHTMLToFragment(html, state);
+    if (fragment && fragment.childCount > 0) {
+      tr = state.tr.insert(pos, fragment.content);
+      insertedSize = tr.doc.content.size - state.doc.content.size;
+    } else {
+      tr = state.tr.insertText(text, pos);
+      insertedSize = text.length;
+    }
+  } else {
+    tr = state.tr.insertText(text, pos);
+    insertedSize = text.length;
+  }
+
+  const newPos = pos + insertedSize;
+  tr.setSelection(TextSelection.create(tr.doc, newPos));
+  tr.setMeta("prosemirror-completion", { type: "apply" });
+
+  return tr;
+}
+
+export function cancelCompletion(state: EditorState): Transaction {
+  const tr = state.tr;
+  tr.setMeta("prosemirror-completion", { type: "cancel" });
+  return tr;
+}
+
+export function hasActiveCompletion(state: EditorState): boolean {
+  const pluginState = completionPluginKey.getState(state);
+  return !!(pluginState?.activeSuggestion && pluginState?.triggerPos !== null);
+}
+
+export function getActiveSuggestion(
+  state: EditorState,
+): CompletionResult | null {
+  const pluginState = completionPluginKey.getState(state);
+  return pluginState?.activeSuggestion ?? null;
 }

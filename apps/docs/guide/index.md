@@ -17,9 +17,9 @@ npm install @prosemirror-completion/plugin
 ```
 
 ```typescript
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
-const completionPlugin = createCompletionPlugin({
+const completionPlugin = completion({
   debounceMs: 300,
   callCompletion: async (context) => {
     // Your completion logic here

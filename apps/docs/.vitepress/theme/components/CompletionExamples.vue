@@ -83,7 +83,7 @@ import { exampleSetup } from "prosemirror-example-setup";
 import { defaultMarkdownParser } from "prosemirror-markdown";
 import {
   buildPrompt,
-  createCompletionPlugin,
+  completion,
   type CompletionContext,
   type CompletionResult,
   type CompletionOptions,
@@ -252,7 +252,7 @@ function createEditor(example: ExampleDefinition) {
   const scenarioOptions = example.createOptions(helpers);
   const { onChange, onApply, onExit, ...restOptions } = scenarioOptions;
 
-  const plugin = createCompletionPlugin({
+  const plugin = completion({
     ...restOptions,
     debounceMs: restOptions.debounceMs ?? 400,
     minTriggerLength: restOptions.minTriggerLength ?? 3,
@@ -309,9 +309,9 @@ function getExamples(): ExampleDefinition[] {
       },
       badges: ["buildPrompt", "auto-type"],
       showPromptPreview: true,
-      code: String.raw`import { buildPrompt, createCompletionPlugin } from "@prosemirror-completion/plugin";
+      code: String.raw`import { buildPrompt, completion } from "@prosemirror-completion/plugin";
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   callCompletion: async (context) => {
     const prompt = buildPrompt(context);
     return pseudoLLM(prompt);
@@ -335,7 +335,7 @@ const plugin = createCompletionPlugin({
       },
       badges: ["showGhost: false", "UX"],
       showGhost: false,
-      code: String.raw`const plugin = createCompletionPlugin({
+      code: String.raw`const plugin = completion({
   showGhost: false,
   callCompletion: async (context) => {
     return \`[\${context.promptType}]\${context.beforeText.slice(-16)}\`;
@@ -391,7 +391,7 @@ const plugin = createCompletionPlugin({
       badges: ["markdown", "prosemirror"],
       code: String.raw`import { defaultMarkdownParser } from "prosemirror-markdown";
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   callCompletion: async () => {
     const markdown = "## Suggestion\\n\\nThis is **bold** and *italic*";
     return { prosemirror: defaultMarkdownParser.parse(markdown) };
@@ -424,7 +424,7 @@ const plugin = createCompletionPlugin({
       extraPanel: "promptTemplate",
       code: String.raw`const template = "Continue {{promptType}} text based on {{beforeText}}";
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   callCompletion: async (context) => {
     const compiled = renderTemplate(template, context);
     return compiled.slice(-80);

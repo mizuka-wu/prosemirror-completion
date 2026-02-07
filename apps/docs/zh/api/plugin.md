@@ -1,11 +1,11 @@
 # API 参考 - 插件
 
-## createCompletionPlugin
+## completion
 
 创建补全插件实例。
 
 ```ts
-function createCompletionPlugin(
+function completion(
   options: CompletionOptions
 ): Plugin<CompletionPluginState>
 ```
@@ -27,9 +27,9 @@ function createCompletionPlugin(
 ### 示例
 
 ```ts
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   debounceMs: 500,
   callCompletion: async () => "suggested completion",
 });

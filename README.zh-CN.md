@@ -19,9 +19,9 @@ npm install @prosemirror-completion/plugin
 ## 快速开始
 
 ```typescript
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
-const completionPlugin = createCompletionPlugin({
+const completionPlugin = completion({
   debounceMs: 300,
   callCompletion: async (context) => {
     return "建议的文本";
@@ -40,7 +40,6 @@ packages/plugin/src/
 ├── keymap.ts      # 键盘处理器
 ├── utils.ts       # 工具函数
 ├── prompts.ts     # 提示词构建器
-├── commands.ts    # 编辑器命令
 └── index.ts       # 主入口导出
 
 apps/

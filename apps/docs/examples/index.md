@@ -18,14 +18,14 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 import { CreateMLCEngine } from "@mlc-ai/web-llm";
 
 const editorEl = ref<HTMLDivElement | null>(null);
 let enginePromise: Promise<ReturnType<typeof CreateMLCEngine>> | null = null;
 const getEngine = () => enginePromise ??= CreateMLCEngine("Llama-3.1-8B-Instruct-q4f32_1-MLC");
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   debounceMs: 400,
   callCompletion: async (context) => {
     const engine = await getEngine();
@@ -75,9 +75,9 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
-const completionPlugin = createCompletionPlugin({
+const completionPlugin = completion({
   debounceMs: 300,
   minTriggerLength: 3,
   callCompletion: async (context) => {
@@ -98,7 +98,7 @@ const view = new EditorView(document.querySelector("#editor"), { state });
 Return HTML so the suggestion inserts formatted content:
 
 ```typescript
-const htmlPlugin = createCompletionPlugin({
+const htmlPlugin = completion({
   debounceMs: 500,
   callCompletion: async (context) => {
     return {
@@ -116,7 +116,7 @@ Parse Markdown into a ProseMirror node via `prosemirror-markdown`:
 ```typescript
 import { defaultMarkdownParser } from "prosemirror-markdown";
 
-const markdownPlugin = createCompletionPlugin({
+const markdownPlugin = completion({
   debounceMs: 500,
   callCompletion: async (context) => {
     const markdown = `
@@ -140,7 +140,7 @@ Return fully constructed ProseMirror nodes:
 ```typescript
 import { schema } from "prosemirror-schema-basic";
 
-const nodePlugin = createCompletionPlugin({
+const nodePlugin = completion({
   debounceMs: 500,
   callCompletion: async (context) => {
     // Create a formatted paragraph
@@ -157,7 +157,7 @@ const nodePlugin = createCompletionPlugin({
 ## Mock Completion
 
 ```typescript
-const mockPlugin = createCompletionPlugin({
+const mockPlugin = completion({
   debounceMs: 500,
   callCompletion: async (context) => {
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -191,7 +191,7 @@ async function getEngine() {
   return enginePromise;
 }
 
-const webLLMPlugin = createCompletionPlugin({
+const webLLMPlugin = completion({
   debounceMs: 800,
   callCompletion: async (context) => {
     const engine = await getEngine();
@@ -212,7 +212,7 @@ const webLLMPlugin = createCompletionPlugin({
 ## With Callbacks
 
 ```typescript
-const pluginWithCallbacks = createCompletionPlugin({
+const pluginWithCallbacks = completion({
   callCompletion: async (context) => {
     return "suggestion";
   },
@@ -251,7 +251,7 @@ const pluginWithCallbacks = createCompletionPlugin({
 ```
 
 ```typescript
-createCompletionPlugin({
+completion({
   callCompletion: myCompletionFn,
   ghostClassName: "my-ghost-text",
 });
@@ -274,7 +274,7 @@ Rules:
 - Finish the sentence naturally.`;
 };
 
-const promptAwarePlugin = createCompletionPlugin({
+const promptAwarePlugin = completion({
   callCompletion: async (context) => {
     const prompt = basePrompt(context);
     return fetchLLM(prompt);

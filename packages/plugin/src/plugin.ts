@@ -5,26 +5,53 @@ import type {
   CompletionPluginState,
   CompletionAction,
   ResolvedCompletionOptions,
+  CompletionContext,
 } from "./types";
 import { completionPluginKey } from "./types";
 import {
   emptyDecorations,
   clearDecorations,
   updateGhostDecoration,
+  parseCompletionResult,
 } from "./decorations";
-import { handleKeyDown, shouldCancelCompletion } from "./keymap";
 import {
   getTextBeforeCursor,
   getTextAfterCursor,
   defaultGetPromptType,
   shouldTriggerCompletion,
 } from "./utils";
-import { insertCompletion } from "./commands";
+
+const LOG_PREFIX = "[prosemirror-completion]";
 
 /**
  * 创建补全插件
  */
 function resolveOptions(options: CompletionOptions): ResolvedCompletionOptions {
+  const debug = options.debug ?? false;
+
+  const providedLogger = options.logger ?? {};
+  const logger: ResolvedCompletionOptions["logger"] = {
+    info:
+      providedLogger.info ??
+      (debug
+        ? (...args: unknown[]) => console.info(LOG_PREFIX, ...args)
+        : () => {}),
+    warn:
+      providedLogger.warn ??
+      (debug
+        ? (...args: unknown[]) => console.warn(LOG_PREFIX, ...args)
+        : () => {}),
+    error:
+      providedLogger.error ??
+      ((...args: unknown[]) => console.error(LOG_PREFIX, ...args)),
+  };
+
+  const onError =
+    options.onError ??
+    ((error: unknown, context: CompletionContext) => {
+      logger.error("Completion error", error, context);
+    });
+
   return {
     debounceMs: options.debounceMs ?? 300,
     minTriggerLength: options.minTriggerLength ?? 3,
@@ -33,22 +60,61 @@ function resolveOptions(options: CompletionOptions): ResolvedCompletionOptions {
     onChange: options.onChange ?? (() => {}),
     onExit: options.onExit ?? (() => {}),
     onApply: options.onApply ?? (() => {}),
+    onError,
+    fallbackResult: options.fallbackResult ?? null,
+    logger,
     ghostClassName: options.ghostClassName ?? "prosemirror-ghost-text",
     showGhost: options.showGhost ?? true,
-    debug: options.debug ?? false,
+    debug,
   };
 }
 
-export function createCompletionPlugin(
+export function completion(
   initOptions: CompletionOptions,
 ): Plugin<CompletionPluginState> {
   const options = resolveOptions(initOptions);
   const debounceMs = options.debounceMs;
   const minTriggerLength = options.minTriggerLength;
-  const debugEnabled = options.debug;
-  const debugLog = (...args: unknown[]) => {
-    if (!debugEnabled) return;
-    console.log("[prosemirror-completion]", ...args);
+
+  let requestSeq = 0;
+  const nextRequestId = () =>
+    `pmc-${Date.now().toString(36)}-${(requestSeq += 1)}`;
+
+  const buildContext = (
+    view: EditorView,
+    pos: number,
+    abortController: AbortController,
+    requestId: string,
+  ): CompletionContext => {
+    const $pos = view.state.doc.resolve(pos);
+    const parent = $pos.parent;
+    const beforeText = getTextBeforeCursor(view.state, pos);
+    const afterText = getTextAfterCursor(view.state, pos);
+    const metrics = {
+      startedAt: Date.now(),
+      beforeChars: beforeText.length,
+      afterChars: afterText.length,
+    };
+
+    const baseContext: CompletionContext = {
+      abortController,
+      parent,
+      pos,
+      beforeText,
+      afterText,
+      promptType: "common",
+      state: view.state,
+      requestId,
+      metrics,
+    };
+
+    const promptType =
+      options.getPromptType?.(baseContext) ?? defaultGetPromptType(baseContext);
+
+    return {
+      ...baseContext,
+      promptType,
+    };
   };
 
   return new Plugin<CompletionPluginState>({
@@ -64,6 +130,9 @@ export function createCompletionPlugin(
           decorations: emptyDecorations(null),
           debounceTimer: null,
           options,
+          activeContext: null,
+          pendingContext: null,
+          lastError: undefined,
         };
       },
 
@@ -75,6 +144,17 @@ export function createCompletionPlugin(
         // 处理 action
         if (action) {
           switch (action.type) {
+            case "request-start":
+              return {
+                ...pluginState,
+                isLoading: true,
+                abortController: action.controller,
+                pendingContext: action.context,
+                triggerPos: action.pos,
+                activeSuggestion: null,
+                lastError: undefined,
+              };
+
             case "suggest":
               return {
                 ...pluginState,
@@ -90,6 +170,10 @@ export function createCompletionPlugin(
                   options,
                 ),
                 debounceTimer: null,
+                activeContext:
+                  action.context ?? pluginState.pendingContext ?? null,
+                pendingContext: null,
+                lastError: undefined,
               };
 
             case "apply": {
@@ -104,6 +188,8 @@ export function createCompletionPlugin(
                   doc: tr.doc,
                 } as import("prosemirror-state").EditorState),
                 debounceTimer: null,
+                activeContext: null,
+                pendingContext: null,
               };
             }
 
@@ -125,12 +211,35 @@ export function createCompletionPlugin(
                   doc: tr.doc,
                 } as import("prosemirror-state").EditorState),
                 debounceTimer: null,
+                activeContext: null,
+                pendingContext: null,
               };
 
             case "loading":
               return {
                 ...pluginState,
                 isLoading: action.isLoading,
+              };
+
+            case "error":
+              return {
+                ...pluginState,
+                isLoading: false,
+                abortController: null,
+                activeSuggestion: null,
+                triggerPos: null,
+                decorations: clearDecorations({
+                  doc: tr.doc,
+                } as import("prosemirror-state").EditorState),
+                activeContext: null,
+                pendingContext: null,
+                lastError: action.error,
+              };
+
+            case "timer":
+              return {
+                ...pluginState,
+                debounceTimer: action.timer,
               };
           }
         }
@@ -155,13 +264,6 @@ export function createCompletionPlugin(
       decorations(state) {
         return this.getState(state)?.decorations ?? null;
       },
-
-      handleKeyDown(view: EditorView, event: KeyboardEvent): boolean {
-        const pluginState = completionPluginKey.getState(view.state);
-        if (!pluginState) return false;
-
-        return handleKeyDown(view, event, pluginState);
-      },
     },
 
     view(editorView) {
@@ -175,127 +277,125 @@ export function createCompletionPlugin(
         return (pos: number) => {
           if (timer) {
             clearTimeout(timer);
+            timer = null;
           }
 
-          // 取消之前的请求
           if (lastAbortController) {
             lastAbortController.abort();
+            lastAbortController = null;
           }
 
           timer = setTimeout(async () => {
             const abortController = new AbortController();
             lastAbortController = abortController;
+            const requestId = nextRequestId();
+            const context = buildContext(view, pos, abortController, requestId);
 
-            // 更新 loading 状态
+            options.logger.info("Trigger completion", {
+              requestId,
+              pos,
+              promptType: context.promptType,
+            });
+
+            options.onChange(context, view);
+
             view.dispatch(
               view.state.tr.setMeta("prosemirror-completion", {
-                type: "loading",
-                isLoading: true,
+                type: "request-start",
+                context,
+                controller: abortController,
+                pos,
               }),
             );
 
             try {
-              const $pos = view.state.doc.resolve(pos);
-              const parent = $pos.parent;
-              const beforeText = getTextBeforeCursor(view.state, pos);
-              const afterText = getTextAfterCursor(view.state, pos);
-              const promptType = options.getPromptType
-                ? options.getPromptType({
-                    abortController,
-                    parent,
-                    pos,
-                    beforeText,
-                    afterText,
-                    promptType: "common",
-                    state: view.state,
-                  })
-                : defaultGetPromptType({
-                    abortController,
-                    parent,
-                    pos,
-                    beforeText,
-                    afterText,
-                    promptType: "common",
-                    state: view.state,
-                  });
-
-              const context = {
-                abortController,
-                parent,
-                pos,
-                beforeText,
-                afterText,
-                promptType,
-                state: view.state,
-              };
-
-              debugLog("Trigger completion", {
-                pos,
-                promptType,
-                beforePreview: beforeText.slice(-40),
-              });
-
-              if (options.onChange) {
-                options.onChange(context, view);
-              }
-
-              // 调用补全函数
               const result = await Promise.resolve(
                 options.callCompletion(context),
               );
 
-              debugLog("Completion result", result);
-
-              // 如果已经被取消，不更新
               if (abortController.signal.aborted) {
-                debugLog("Completion aborted", { pos });
+                options.logger.info("Completion aborted", { requestId, pos });
                 return;
               }
 
-              // 更新建议
+              context.metrics.durationMs =
+                Date.now() - context.metrics.startedAt;
+              context.metrics.resultChars =
+                parseCompletionResult(result).length;
+
               view.dispatch(
                 view.state.tr.setMeta("prosemirror-completion", {
                   type: "suggest",
                   result,
                   pos,
+                  context,
                 }),
               );
             } catch (error) {
               if (abortController.signal.aborted) {
+                options.logger.info("Completion aborted", { requestId, pos });
                 return;
               }
-              console.error(
-                "[prosemirror-completion] Completion error:",
-                error,
+
+              options.onError(error, context);
+              const message =
+                error instanceof Error ? error.message : String(error);
+
+              view.dispatch(
+                view.state.tr.setMeta("prosemirror-completion", {
+                  type: "error",
+                  error: message,
+                }),
               );
+
+              if (options.fallbackResult) {
+                context.metrics.durationMs =
+                  Date.now() - context.metrics.startedAt;
+                context.metrics.usedFallback = true;
+                context.metrics.resultChars = parseCompletionResult(
+                  options.fallbackResult,
+                ).length;
+
+                view.dispatch(
+                  view.state.tr.setMeta("prosemirror-completion", {
+                    type: "suggest",
+                    result: options.fallbackResult,
+                    pos,
+                    context,
+                  }),
+                );
+              }
             } finally {
-              // 清除 loading 状态
               view.dispatch(
                 view.state.tr.setMeta("prosemirror-completion", {
                   type: "loading",
                   isLoading: false,
                 }),
               );
+              lastAbortController = null;
+              timer = null;
+              view.dispatch(
+                view.state.tr.setMeta("prosemirror-completion", {
+                  type: "timer",
+                  timer: null,
+                }),
+              );
             }
-
-            timer = null;
-            lastAbortController = null;
           }, debounceMs);
 
-          // 保存 timer 到插件状态
-          const currentState = completionPluginKey.getState(view.state);
-          if (currentState && currentState.debounceTimer) {
-            clearTimeout(currentState.debounceTimer);
-          }
+          view.dispatch(
+            view.state.tr.setMeta("prosemirror-completion", {
+              type: "timer",
+              timer,
+            }),
+          );
         };
       })();
 
       // 监听文档和选择变化
       const handleInput = (from: number) => {
         // 检查是否应该触发补全
-        if (
-          !shouldTriggerCompletion(view.state, { ...options, minTriggerLength })
-        ) {
+        if (!shouldTriggerCompletion(view.state, options)) {
           return;
         }
         // 触发新的补全请求
@@ -315,9 +415,7 @@ export function createCompletionPlugin(
               view.state.selection.eq(prevState.selection) === false;
             const docChanged = view.state.doc !== prevState.doc;
 
-            // 如果有补全，检查是否需要取消
             if (docChanged || selectionChanged) {
-              // 取消当前补全
               view.dispatch(
                 view.state.tr.setMeta("prosemirror-completion", {
                   type: "cancel",

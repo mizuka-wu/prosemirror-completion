@@ -30,7 +30,7 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { exampleSetup } from "prosemirror-example-setup";
 import {
-  createCompletionPlugin,
+  completion,
   type CompletionContext,
   type CompletionResult,
   buildPrompt,
@@ -112,7 +112,7 @@ const {
   messageKey: webllmMessageKey,
 } = useWebLLM();
 
-const completionPlugin = createCompletionPlugin({
+const completionPlugin = completion({
   debounceMs: 500,
   minTriggerLength: 3,
   debug: true,

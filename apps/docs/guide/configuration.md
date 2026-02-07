@@ -100,7 +100,7 @@ type CompletionResult = {
 ### Fast Typing
 
 ```typescript
-createCompletionPlugin({
+completion({
   debounceMs: 100,  // Quick response
   minTriggerLength: 2,
   callCompletion: myCompletionFn,
@@ -110,7 +110,7 @@ createCompletionPlugin({
 ### Conservative
 
 ```typescript
-createCompletionPlugin({
+completion({
   debounceMs: 800,  // Wait for user to pause
   minTriggerLength: 10,  // More context needed
   callCompletion: myCompletionFn,
@@ -120,7 +120,7 @@ createCompletionPlugin({
 ### Code Completion
 
 ```typescript
-createCompletionPlugin({
+completion({
   debounceMs: 500,
   getPromptType: (ctx) => {
     // Detect if in code block

@@ -1,49 +1,8 @@
+import type { Command } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
-import type { CompletionPluginState, CompletionAction } from "./types";
-import { insertCompletion } from "./commands";
-
-/**
- * 键盘事件处理器
- * 处理 Tab（应用）、Esc（取消）、和其他按键
- */
-export function handleKeyDown(
-  view: EditorView,
-  event: KeyboardEvent,
-  pluginState: CompletionPluginState,
-): boolean {
-  const { activeSuggestion, triggerPos, options } = pluginState;
-
-  // 没有激活的补全时，不拦截
-  if (!activeSuggestion || triggerPos === null) {
-    return false;
-  }
-
-  // Tab: 应用补全
-  if (event.key === "Tab" && !event.shiftKey) {
-    event.preventDefault();
-    event.stopPropagation();
-    view.focus();
-    // 使用 insertCompletion 实际插入文本
-    const tr = insertCompletion(view.state, activeSuggestion);
-    view.dispatch(tr);
-    options?.onApply?.(activeSuggestion, view);
-    return true;
-  }
-
-  // Escape: 取消补全
-  if (event.key === "Escape") {
-    event.preventDefault();
-    event.stopPropagation();
-    const action: CompletionAction = { type: "cancel" };
-    view.dispatch(view.state.tr.setMeta("prosemirror-completion", action));
-    options?.onExit?.(view);
-    view.focus();
-    return true;
-  }
-
-  // 其他按键：更新状态，让 state.apply 处理
-  return false;
-}
+import type { CompletionPluginState } from "./types";
+import { completionPluginKey } from "./types";
+import { insertCompletion } from "./utils";
 
 /**
  * 检查是否需要取消补全（光标移出触发区域等）
@@ -67,3 +26,41 @@ export function shouldCancelCompletion(
 
   return false;
 }
+
+export const approveCompletion: Command = (state, dispatch, view) => {
+  const pluginState = completionPluginKey.getState(state);
+  if (!pluginState?.activeSuggestion || pluginState.triggerPos === null) {
+    return false;
+  }
+
+  const tr = insertCompletion(state, pluginState.activeSuggestion);
+  dispatch?.(tr);
+
+  if (view) {
+    const exitContext = pluginState.activeContext ?? undefined;
+    pluginState.options.onApply(
+      pluginState.activeSuggestion,
+      view,
+      exitContext,
+    );
+  }
+
+  return true;
+};
+
+export const exitCompletion: Command = (state, dispatch, view) => {
+  const pluginState = completionPluginKey.getState(state);
+  if (!pluginState?.activeSuggestion) {
+    return false;
+  }
+
+  dispatch?.(state.tr.setMeta("prosemirror-completion", { type: "cancel" }));
+
+  if (view) {
+    const exitContext =
+      pluginState.activeContext ?? pluginState.pendingContext ?? undefined;
+    pluginState.options.onExit(view, exitContext);
+  }
+
+  return true;
+};

@@ -4,7 +4,7 @@ import { Schema, DOMParser } from "prosemirror-model";
 import { schema as basicSchema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
 import { defaultMarkdownParser } from "prosemirror-markdown";
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 import type {
   CompletionContext,
   CompletionResult,
@@ -141,7 +141,7 @@ const modeDescriptions: Record<CompletionMode, string> = {
 
 // Create editor
 function createEditor(container: HTMLElement, mode: CompletionMode) {
-  const completionPlugin = createCompletionPlugin({
+  const completionPlugin = completion({
     debounceMs: 500,
     minTriggerLength: 3,
     callCompletion: completionHandlers[mode],

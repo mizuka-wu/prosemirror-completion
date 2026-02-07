@@ -35,9 +35,9 @@ pnpm add @prosemirror-completion/plugin
 ```
 
 ```ts
-import { createCompletionPlugin } from "@prosemirror-completion/plugin";
+import { completion } from "@prosemirror-completion/plugin";
 
-const plugin = createCompletionPlugin({
+const plugin = completion({
   debounceMs: 300,
   callCompletion: async (context) => {
     // Customize your completion logic

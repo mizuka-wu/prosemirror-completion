@@ -3,7 +3,7 @@ import { EditorState } from "prosemirror-state";
 import { Schema } from "prosemirror-model";
 import { schema as basicSchema } from "prosemirror-schema-basic";
 import {
-  createCompletionPlugin,
+  completion,
   insertCompletion,
   parseCompletionResult,
 } from "@prosemirror-completion/plugin";
@@ -23,7 +23,7 @@ function createEditorState(result: CompletionResult) {
   const mockCallCompletion = vi.fn(
     async (): Promise<CompletionResult> => result,
   );
-  const plugin = createCompletionPlugin({
+  const plugin = completion({
     callCompletion: mockCallCompletion,
   });
   return EditorState.create({
@@ -38,7 +38,7 @@ describe("Completion Plugin", () => {
       async (): Promise<CompletionResult> => "test",
     );
 
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
     });
 
@@ -51,7 +51,7 @@ describe("Completion Plugin", () => {
       async (): Promise<CompletionResult> => "test",
     );
 
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
       debounceMs: 300,
       minTriggerLength: 3,
@@ -82,7 +82,7 @@ describe("Completion Plugin", () => {
       },
     );
 
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
     });
 
@@ -140,7 +140,7 @@ describe("Insert Completion", () => {
     const mockCallCompletion = vi.fn(
       async (): Promise<CompletionResult> => "test result",
     );
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
     });
 
@@ -174,7 +174,7 @@ describe("Insert Completion", () => {
     const mockCallCompletion = vi.fn(
       async (): Promise<CompletionResult> => htmlResult,
     );
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
     });
 
@@ -207,7 +207,7 @@ describe("Insert Completion", () => {
     const mockCallCompletion = vi.fn(
       async (): Promise<CompletionResult> => nodeResult,
     );
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
     });
 
@@ -237,7 +237,7 @@ describe("Ghost Text Decoration", () => {
       async (): Promise<CompletionResult> => "test",
     );
 
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
       ghostClassName: "custom-ghost-class",
     });
@@ -250,7 +250,7 @@ describe("Ghost Text Decoration", () => {
       async (): Promise<CompletionResult> => "test",
     );
 
-    const plugin = createCompletionPlugin({
+    const plugin = completion({
       callCompletion: mockCallCompletion,
       showGhost: false,
     });
