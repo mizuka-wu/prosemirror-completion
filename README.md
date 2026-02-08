@@ -4,16 +4,17 @@ Copilot-style text completion plugin for ProseMirror.
 
 ## Features
 
-- 🎯 **Invisible Trigger**: Automatically triggers completion as you type
+- 🎯 **Invisible Trigger**: Automatically triggers completion as you type based on cursor context
 - 👻 **Ghost Text**: Visual suggestion overlay that doesn't interfere with editing
 - ⌨️ **Intuitive Keybindings**: Tab to accept, Esc to cancel
-- 🔌 **Customizable**: Debounce, abort controller, custom prompts
-- 🤖 **WebLLM Integration**: Built-in support for browser-based LLM inference
+- 🔌 **Customizable**: Debounce timing, abort controller, custom prompt builders
+- 🎨 **Rich Results**: Support plain text, HTML, Markdown, or ProseMirror nodes
+- ⚡ **Framework Agnostic**: Works with any JavaScript framework or vanilla JS
 
 ## Installation
 
 ```bash
-npm install @prosemirror-completion/plugin
+npm install prosemirror-completion
 ```
 
 ## Quick Start
@@ -28,7 +29,7 @@ import {
   completion,
   approveCompletion,
   exitCompletion,
-} from "@prosemirror-completion/plugin";
+} from "prosemirror-completion";
 
 const completionPlugin = completion({
   debounceMs: 300,
@@ -59,7 +60,7 @@ const view = new EditorView(document.querySelector("#editor")!, {
 
 ### Completion result shapes
 
-`callCompletion` 可以返回简单字符串，或包含 HTML、ProseMirror Node 的对象：
+`callCompletion` can return a simple string, or an object containing HTML or ProseMirror Node:
 
 ```ts
 type CompletionResult =
@@ -71,22 +72,22 @@ type CompletionResult =
 
 ## Configuration
 
-`completion` 接受以下可配置项：
+`completion` accepts the following configuration options:
 
-| 选项 | 类型 | 默认值 | 说明 |
+| Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `debounceMs` | `number` | `300` | 触发补全前的防抖时间，单位毫秒 |
-| `minTriggerLength` | `number` | `3` | 光标前至少输入多少字符才会开始请求 |
-| `callCompletion` | `(context) => CompletionResult \| Promise<CompletionResult>` | **必填** | 真正的补全函数，返回字符串、HTML 或 ProseMirror Node |
-| `getPromptType` | `(context) => PromptType` | `defaultGetPromptType` | 自定义 prompt 类型推断逻辑（如代码/Markdown 检测） |
-| `onChange` | `(context, view) => void` | `undefined` | 用户持续输入时触发，可用于埋点或实时展示状态 |
-| `ghostClassName` | `string` | `"prosemirror-ghost-text"` | Ghost Text 的自定义样式类名 |
-| `showGhost` | `boolean` | `true` | 是否展示 Ghost Text（可关闭仅保留快捷键行为） |
-| `debug` | `boolean` | `false` | 是否输出调试日志，便于排查触发与请求过程 |
+| `debounceMs` | `number` | `300` | Debounce time before triggering completion, in milliseconds |
+| `minTriggerLength` | `number` | `3` | Minimum characters before cursor to trigger completion request |
+| `callCompletion` | `(context) => CompletionResult \| Promise<CompletionResult>` | **Required** | The actual completion function, returns string, HTML or ProseMirror Node |
+| `getPromptType` | `(context) => PromptType` | `defaultGetPromptType` | Custom prompt type inference logic (e.g., code/Markdown detection) |
+| `onChange` | `(context, view) => void` | `undefined` | Triggered when user types continuously, can be used for analytics or real-time status display |
+| `ghostClassName` | `string` | `"prosemirror-ghost-text"` | Custom CSS class for Ghost Text |
+| `showGhost` | `boolean` | `true` | Whether to show Ghost Text (can be disabled to keep only keyboard behavior) |
+| `debug` | `boolean` | `false` | Whether to output debug logs for troubleshooting trigger and request processes |
 
-> `CompletionResult` 支持 `string`、`{ plain; html? }`、`{ html }`、`{ prosemirror: Node }`，详见 docs 示例。
+> `CompletionResult` supports `string`, `{ plain; html? }`, `{ html }`, `{ prosemirror: Node }`, see docs for examples.
 >
-> 回调层面如果需要在用户接受/取消补全时执行逻辑，可监听并扩展导出的 `approveCompletion`/`exitCompletion` 命令。
+> If you need to execute logic when the user accepts/cancels completion at the callback level, you can listen to and extend the exported `approveCompletion`/`exitCompletion` commands.
 
 ## Project Structure
 

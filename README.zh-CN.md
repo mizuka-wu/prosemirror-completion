@@ -4,16 +4,17 @@ ProseMirror 的类 Copilot 文本补全插件。
 
 ## 功能特性
 
-- 🎯 **隐形触发**: 输入时自动触发补全
+- 🎯 **隐形触发**: 基于光标上下文，输入时自动触发补全
 - 👻 **幽灵文本**: 视觉建议覆盖层，不干扰编辑
 - ⌨️ **直观快捷键**: Tab 接受，Esc 取消
-- 🔌 **高度可定制**: 防抖、中止控制器、自定义提示词
-- 🤖 **WebLLM 集成**: 内置浏览器端 LLM 推理支持
+- 🔌 **高度可定制**: 防抖时间、中止控制器、自定义提示词构建器
+- 🎨 **丰富结果**: 支持纯文本、HTML、Markdown 或 ProseMirror 节点
+- ⚡ **框架无关**: 可与任何 JavaScript 框架或原生 JS 配合使用
 
 ## 安装
 
 ```bash
-npm install @prosemirror-completion/plugin
+npm install prosemirror-completion
 ```
 
 ## 快速开始
@@ -28,7 +29,7 @@ import {
   completion,
   approveCompletion,
   exitCompletion,
-} from "@prosemirror-completion/plugin";
+} from "prosemirror-completion";
 
 const completionPlugin = completion({
   debounceMs: 300,
