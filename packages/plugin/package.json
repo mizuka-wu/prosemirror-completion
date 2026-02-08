@@ -1,6 +1,6 @@
 {
   "name": "@prosemirror-completion/plugin",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "Copilot-style text completion plugin for ProseMirror",
   "private": true,
   "type": "module",
