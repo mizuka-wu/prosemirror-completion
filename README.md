@@ -141,9 +141,47 @@ pnpm --filter @prosemirror-completion/plugin build
 
 The plugin is built with a three-layer architecture:
 
-1. **Matcher (State Tracker)**: Tracks cursor position and triggers completion using Transaction meta
-2. **Ghost Decoration**: Virtual rendering layer using ProseMirror DecorationSet
-3. **Key Handler**: Intercepts Tab and Esc for completion actions
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    User Interaction                         │
+│              (Type → View updates → State)                  │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
+│  │   Matcher    │───▶│ Completion   │───▶│   Ghost      │  │
+│  │  (Plugin)    │    │   Request    │    │ Decoration   │  │
+│  └──────────────┘    └──────────────┘    └──────────────┘  │
+│         │                   │                   │           │
+│         │ Triggers          │ Returns           │ Renders   │
+│         │ when idle         │ suggestion        │ overlay   │
+└─────────────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Key Handler (Keymap)                     │
+│              Tab: approve    Esc: cancel                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+1. **Input Detection**: As the user types, the Matcher tracks cursor position and text changes via ProseMirror Transactions
+2. **Trigger Logic**: When conditions are met (debounce timeout, minTriggerLength), it fires the completion request
+3. **Async Completion**: `callCompletion` is invoked with context (beforeText, afterText, promptType) to fetch the suggestion
+4. **Ghost Rendering**: The returned suggestion is rendered as a ghost text decoration overlay
+5. **User Action**: Tab accepts the completion, Escape cancels it
+
+### Core Components
+
+| Component | Purpose | File |
+|-----------|---------|------|
+| **Matcher** | State tracking, trigger detection | `plugin.ts` |
+| **Decorations** | Ghost text overlay rendering | `decorations.ts` |
+| **Keymap** | Keyboard handler for Tab/Esc | `keymap.ts` |
+| **Prompts** | Built-in prompt type builders | `prompts.ts` |
+| **Utils** | Commands and context helpers | `utils.ts` |
 
 ## License
 
