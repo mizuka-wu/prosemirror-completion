@@ -72,7 +72,7 @@ type CompletionAction =
 从 `EditorState` 中读取插件状态：
 
 ```ts
-import { completionPluginKey } from "@prosemirror-completion/plugin";
+import { completionPluginKey } from "prosemirror-completion";
 
 const pluginState = completionPluginKey.getState(editorState);
 ```

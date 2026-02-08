@@ -18,7 +18,7 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { schema } from "prosemirror-schema-basic";
 import { exampleSetup } from "prosemirror-example-setup";
-import { completion } from "@prosemirror-completion/plugin";
+import { completion } from "prosemirror-completion";
 import { CreateMLCEngine } from "@mlc-ai/web-llm";
 
 const editorEl = ref<HTMLDivElement | null>(null);

@@ -1,6 +1,7 @@
 {
   "name": "@prosemirror-completion/plugin",
   "version": "0.0.8",
+  "description": "Copilot-style text completion plugin for ProseMirror",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -17,6 +18,25 @@
     }
   },
   "license": "MIT",
+  "keywords": [
+    "prosemirror",
+    "completion",
+    "copilot",
+    "ghost-text",
+    "editor",
+    "ai",
+    "llm",
+    "suggestion"
+  ],
+  "author": "ProseMirror Completion Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mizuka-wu/prosemirror-completion.git"
+  },
+  "homepage": "https://mizuka-wu.github.io/prosemirror-completion/",
+  "bugs": {
+    "url": "https://github.com/mizuka-wu/prosemirror-completion/issues"
+  },
   "scripts": {
     "build": "vite build && node ./scripts/postbuild.mjs",
     "lint": "eslint \"**/*.ts\""

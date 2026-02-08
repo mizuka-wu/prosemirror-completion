@@ -13,7 +13,7 @@
 ## Quick Start
 
 ```bash
-npm install @prosemirror-completion/plugin
+npm install prosemirror-completion
 ```
 
 ```ts
@@ -26,7 +26,7 @@ import {
   completion,
   approveCompletion,
   exitCompletion,
-} from "@prosemirror-completion/plugin";
+} from "prosemirror-completion";
 
 const completionPlugin = completion({
   debounceMs: 300,

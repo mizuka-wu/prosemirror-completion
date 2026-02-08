@@ -74,7 +74,7 @@ type CompletionAction =
 Access plugin state from editor state.
 
 ```typescript
-import { completionPluginKey } from "@prosemirror-completion/plugin";
+import { completionPluginKey } from "prosemirror-completion";
 
 const pluginState = completionPluginKey.getState(editorState);
 ```

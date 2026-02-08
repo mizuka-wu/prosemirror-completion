@@ -39,7 +39,7 @@ export const getEngine = () => {
 ## 注册补全插件
 
 ```ts
-import { completion } from "@prosemirror-completion/plugin";
+import { completion } from "prosemirror-completion";
 import { getEngine } from "./engine";
 
 export const webLLMPlugin = completion({

@@ -31,7 +31,7 @@ features:
 ## Quick Start
 
 ```bash
-pnpm add @prosemirror-completion/plugin
+pnpm add prosemirror-completion
 ```
 
 ```ts
@@ -44,7 +44,7 @@ import {
   completion,
   approveCompletion,
   exitCompletion,
-} from "@prosemirror-completion/plugin";
+} from "prosemirror-completion";
 
 const completionPlugin = completion({
   debounceMs: 300,

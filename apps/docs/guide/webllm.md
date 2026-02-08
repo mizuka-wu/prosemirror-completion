@@ -39,7 +39,7 @@ export const getEngine = () => {
 ## Wiring the completion plugin
 
 ```ts
-import { completion } from "@prosemirror-completion/plugin";
+import { completion } from "prosemirror-completion";
 import { getEngine } from "./engine";
 
 export const webLLMPlugin = completion({

@@ -11,7 +11,7 @@ function buildCommonPrompt(context: CompletionContext): string
 ```
 
 ```ts
-import { buildCommonPrompt } from "@prosemirror-completion/plugin";
+import { buildCommonPrompt } from "prosemirror-completion";
 
 const prompt = buildCommonPrompt(context);
 // Continue the following text naturally and concisely:

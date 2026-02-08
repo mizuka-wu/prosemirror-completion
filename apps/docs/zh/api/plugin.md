@@ -27,7 +27,7 @@ function completion(
 ### 示例
 
 ```ts
-import { completion } from "@prosemirror-completion/plugin";
+import { completion } from "prosemirror-completion";
 
 const plugin = completion({
   debounceMs: 500,

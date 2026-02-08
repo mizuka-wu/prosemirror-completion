@@ -4,7 +4,7 @@ title: ProseMirror Completion
 hero:
   name: ProseMirror Completion
   text: 为 ProseMirror 编辑器带来 Copilot 式补全体验
-  tagline: Ghost Text、隐形触发器与可定制工作流，由 @prosemirror-completion/plugin 驱动。
+  tagline: Ghost Text、隐形触发器与可定制工作流，由 prosemirror-completion 驱动。
   actions:
     - theme: brand
       text: 快速开始
@@ -31,7 +31,7 @@ features:
 ## 快速上手
 
 ```bash
-pnpm add @prosemirror-completion/plugin
+pnpm add prosemirror-completion
 ```
 
 ```ts
@@ -44,7 +44,7 @@ import {
   completion,
   approveCompletion,
   exitCompletion,
-} from "@prosemirror-completion/plugin";
+} from "prosemirror-completion";
 
 const completionPlugin = completion({
   debounceMs: 300,

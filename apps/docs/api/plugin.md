@@ -29,7 +29,7 @@ function completion(
 ### Example
 
 ```typescript
-import { completion } from "@prosemirror-completion/plugin";
+import { completion } from "prosemirror-completion";
 
 const plugin = completion({
   debounceMs: 500,

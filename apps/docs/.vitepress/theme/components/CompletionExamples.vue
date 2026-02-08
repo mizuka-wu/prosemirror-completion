@@ -301,7 +301,7 @@ function getExamples(): ExampleDefinition[] {
       },
       badges: ["buildPrompt", "auto-type"],
       showPromptPreview: true,
-      code: String.raw`import { buildPrompt, completion } from "@prosemirror-completion/plugin";
+      code: String.raw`import { buildPrompt, completion } from "prosemirror-completion";
 
 const plugin = completion({
   callCompletion: async (context) => {

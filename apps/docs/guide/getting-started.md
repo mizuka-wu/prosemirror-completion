@@ -3,11 +3,11 @@
 ## Installation
 
 ```bash
-npm install @prosemirror-completion/plugin
+npm install prosemirror-completion
 # or
-yarn add @prosemirror-completion/plugin
+yarn add prosemirror-completion
 # or
-pnpm add @prosemirror-completion/plugin
+pnpm add prosemirror-completion
 ```
 
 ## Basic Usage
@@ -22,7 +22,7 @@ import {
   completion,
   approveCompletion,
   exitCompletion,
-} from "@prosemirror-completion/plugin";
+} from "prosemirror-completion";
 
 // Create the completion plugin
 const completionPlugin = completion({

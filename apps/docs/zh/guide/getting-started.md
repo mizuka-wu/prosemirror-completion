@@ -3,11 +3,11 @@
 ## 安装
 
 ```bash
-npm install @prosemirror-completion/plugin
+npm install prosemirror-completion
 # 或
-yarn add @prosemirror-completion/plugin
+yarn add prosemirror-completion
 # 或
-pnpm add @prosemirror-completion/plugin
+pnpm add prosemirror-completion
 ```
 
 ## 基础用法
@@ -22,7 +22,7 @@ import {
   completion,
   approveCompletion,
   exitCompletion,
-} from "@prosemirror-completion/plugin";
+} from "prosemirror-completion";
 
 // 创建补全插件
 const completionPlugin = completion({

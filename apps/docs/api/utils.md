@@ -13,7 +13,7 @@ function buildCommonPrompt(context: CompletionContext): string
 **Example:**
 
 ```typescript
-import { buildCommonPrompt } from "@prosemirror-completion/plugin";
+import { buildCommonPrompt } from "prosemirror-completion";
 
 const prompt = buildCommonPrompt(context);
 // Returns:
@@ -35,7 +35,7 @@ function buildCodePrompt(context: CompletionContext): string
 **Example:**
 
 ```typescript
-import { buildCodePrompt } from "@prosemirror-completion/plugin";
+import { buildCodePrompt } from "prosemirror-completion";
 
 const prompt = buildCodePrompt(context);
 // Returns code-formatted prompt
@@ -63,7 +63,7 @@ function buildPrompt(
 **Example:**
 
 ```typescript
-import { buildPrompt } from "@prosemirror-completion/plugin";
+import { buildPrompt } from "prosemirror-completion";
 
 // Uses context.promptType
 const prompt = buildPrompt(context);
@@ -87,7 +87,7 @@ function detectLanguage(beforeText: string): string
 **Example:**
 
 ```typescript
-import { detectLanguage } from "@prosemirror-completion/plugin";
+import { detectLanguage } from "prosemirror-completion";
 
 const lang = detectLanguage("const x: string = ");
 // Returns: "typescript"
@@ -128,6 +128,7 @@ function defaultGetPromptType(
 ```
 
 Detects based on content patterns:
+
 - Code: Function definitions, imports, etc.
 - Markdown: Headers, lists, formatting
 - Common: Default fallback
@@ -148,7 +149,7 @@ function debounce<T extends (...args: unknown[]) => unknown>(
 **Example:**
 
 ```typescript
-import { debounce } from "@prosemirror-completion/plugin";
+import { debounce } from "prosemirror-completion";
 
 const debouncedFn = debounce((text: string) => {
   console.log(text);

@@ -11,7 +11,7 @@
 ## 1. 安装依赖
 
 ```bash
-pnpm add @prosemirror-completion/plugin @mlc-ai/web-llm prosemirror-example-setup prosemirror-state prosemirror-view
+pnpm add prosemirror-completion @mlc-ai/web-llm prosemirror-example-setup prosemirror-state prosemirror-view
 ```
 
 ## 2. 创建 WebLLM Loader
@@ -39,7 +39,7 @@ export async function getEngine() {
 
 ```ts
 // completionPlugin.ts
-import { completion } from "@prosemirror-completion/plugin";
+import { completion } from "prosemirror-completion";
 import { getEngine } from "./webllm";
 
 export const webLLMPlugin = completion({
